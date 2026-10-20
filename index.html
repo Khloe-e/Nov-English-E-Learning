@@ -1025,15 +1025,23 @@
                 document.getElementById('modal-teacher-auth').classList.add('hidden');
                 openTeacherDashboard();
             } else {
-                showCustomMessage("密碼錯誤", "教師登入密碼不正確！預設密碼為 teacher123");
+                showCustomMessage("密碼錯誤", "教師登入密碼不正確！");
+            }
+        }
+
+        window.exitTeacherDashboard = function() {
+            // If student is logged in, return to dashboard, otherwise return to login view
+            if (currentStudentName) {
+                switchView('view-dashboard');
+            } else {
+                switchView('view-login');
             }
         }
 
         function openTeacherDashboard() {
             switchView('view-teacher-dashboard');
             if (!db) {
-                document.getElementById('teacher-live-tbody').innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">目前處於離線/無雲端資料庫模式。</td></tr>';
-                document.getElementById('teacher-records-tbody').innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">目前處於離線/無雲端資料庫模式。</td></tr>';
+                showCustomMessage("資料庫警示", "未成功連線至雲端資料庫。");
                 return;
             }
 
@@ -1071,7 +1079,9 @@
                     tbody.appendChild(tr);
                 });
             }, (error) => {
-                console.error("Teacher Live error:", error);
+                console.warn("Teacher Live error (Permissions or Network):", error);
+                const tbody = document.getElementById('teacher-live-tbody');
+                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-red-500 font-semibold">⚠️ 雲端權限不足或未授權存取即時動態 (Missing or insufficient permissions)</td></tr>';
             });
 
             const completedRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'student_records');
@@ -1117,7 +1127,9 @@
                     tbody.appendChild(tr);
                 });
             }, (error) => {
-                console.error("Teacher Records error:", error);
+                console.warn("Teacher Records error (Permissions or Network):", error);
+                const tbody = document.getElementById('teacher-records-tbody');
+                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-red-500 font-semibold">⚠️ 雲端權限不足或未授權存取交卷紀錄 (Missing or insufficient permissions)</td></tr>';
             });
         }
 
