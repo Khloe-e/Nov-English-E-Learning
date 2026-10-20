@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高二英文線上課程與測驗系統 (L4-L6)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+
+    <nav class="bg-blue-800 text-white shadow-md p-4">
+        <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center space-x-2">
+                <svg class="w-7 h-7 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                <h1 class="text-xl font-bold">高二英文 (L4-L6) 雲端學習系統</h1>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <div id="nav-user-info" class="hidden font-medium bg-blue-700 px-3 py-1.5 rounded-full text-sm flex items-center">
+                    <span class="w-2 h-2 rounded-full bg-green-400 mr-2"></span>
+                    學生：<span id="display-student-name" class="font-bold ml-1"></span>
+                </div>
+                <button onclick="promptTeacherAuth()" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-3 py-1.5 rounded-lg text-sm transition shadow flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    教師監控後台
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex items-center justify-center p-4">
+        
+        <!-- View 1: Student Login -->
+        <div id="view-login" class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full fade-in border border-gray-100">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">學生登入驗證</h2>
+                <p class="text-sm text-gray-500 mt-2">請輸入您的真實姓名。系統即時雲端自動存檔並同步進度給老師。</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label for="student-name" class="block text-sm font-semibold text-gray-700 mb-1">姓名 / 學號</label>
+                    <input type="text" id="student-name" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="例如：王小明">
+                </div>
+                <button id="btn-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md flex justify-center items-center">
+                    <span>進入測驗系統</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- View 2: Student Dashboard -->
+        <div id="view-dashboard" class="hidden w-full max-w-5xl fade-in my-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-800">複習與測驗單元</h2>
+                    <p class="text-gray-600 mt-1">請選擇欲練習的單元。答題過程自動存檔，可隨時離線接續寫。</p>
+                </div>
+                <button onclick="showRecords()" class="bg-indigo-600 text-white hover:bg-indigo-700 px-5 py-2.5 rounded-lg font-semibold transition flex items-center shadow">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    查看個人歷史紀錄與對答明細
+                </button>
+            </div>
+
+            <!-- Grammar Modules -->
+            <h3 class="text-xl font-bold text-gray-700 mb-3 flex items-center">
+                <span class="w-2.5 h-6 bg-yellow-500 rounded-full mr-2"></span>段考綜合挑戰與課文閱讀 (依單元分類)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-sm border border-yellow-200 p-6 hover:shadow-md transition cursor-pointer flex flex-col justify-between border-l-4 border-l-yellow-500" onclick="checkDraftAndStart('L4_Exam')">
+                    <div>
+                        <div class="bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">Lesson 4 綜合</div>
+                        <h4 class="text-lg font-bold text-gray-800 mb-2">L4 段考綜合測驗</h4>
+                        <p class="text-sm text-gray-600 mb-4">專屬 Lesson 4 之字彙、文法與克漏字綜合模擬題庫。</p>
+                    </div>
+                    <button class="w-full bg-yellow-50 text-yellow-600 font-semibold py-2 rounded-lg hover:bg-yellow-500 hover:text-white transition">開始測驗</button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-yellow-200 p-6 hover:shadow-md transition cursor-pointer flex flex-col justify-between border-l-4 border-l-yellow-500" onclick="checkDraftAndStart('L5_Exam')">
+                    <div>
+                        <div class="bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">Lesson 5 綜合</div>
+                        <h4 class="text-lg font-bold text-gray-800 mb-2">L5 段考綜合測驗</h4>
+                        <p class="text-sm text-gray-600 mb-4">專屬 Lesson 5 之字彙、文法與克漏字綜合模擬題庫。</p>
+                    </div>
+                    <button class="w-full bg-yellow-50 text-yellow-600 font-semibold py-2 rounded-lg hover:bg-yellow-500 hover:text-white transition">開始測驗</button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-yellow-200 p-6 hover:shadow-md transition cursor-pointer flex flex-col justify-between border-l-4 border-l-yellow-500" onclick="checkDraftAndStart('L6_Exam')">
+                    <div>
+                        <div class="bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">Lesson 6 綜合</div>
+                        <h4 class="text-lg font-bold text-gray-800 mb-2">L6 段考綜合測驗</h4>
+                        <p class="text-sm text-gray-600 mb-4">專屬 Lesson 6 之字彙、文法與克漏字綜合模擬題庫。</p>
+                    </div>
+                    <button class="w-full bg-yellow-50 text-yellow-600 font-semibold py-2 rounded-lg hover:bg-yellow-500 hover:text-white transition">開始測驗</button>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-bold text-gray-700 mb-3 flex items-center">
+                <span class="w-2.5 h-6 bg-teal-500 rounded-full mr-2"></span>課本文意選填特訓 (依單元分類)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-xl shadow-sm border border-teal-200 p-6 hover:shadow-md transition cursor-pointer flex flex-col justify-between border-l-4 border-l-teal-500" onclick="checkDraftAndStart('L4_Cloze')">
+                    <div>
+                        <div class="bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">Lesson 4 閱讀</div>
+                        <h4 class="text-lg font-bold text-gray-800 mb-2">L4 課本文意選填</h4>
+                        <p class="text-sm text-gray-600 mb-4">結和 Lesson 4 課本脈絡的專屬克漏字與文意選填訓練。</p>
+                    </div>
+                    <button class="w-full bg-teal-50 text-teal-600 font-semibold py-2 rounded-lg hover:bg-teal-600 hover:text-white transition">開始選填</button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-teal-200 p-6 hover:shadow-md transition cursor-pointer flex flex-col justify-between border-l-4 border-l-teal-500" onclick="checkDraftAndStart('L5_Cloze')">
+                    <div>
+                        <div class="bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">Lesson 5 閱讀</div>
+                        <h4 class="text-lg font-bold text-gray-800 mb-2">L5 課本文意選填</h4>
+                        <p class="text-sm text-gray-600 mb-4">結和 Lesson 5 課本脈絡的專屬克漏字與文意選填訓練。</p>
+                    </div>
+                    <button class="w-full bg-teal-50 text-teal-600 font-semibold py-2 rounded-lg hover:bg-teal-600 hover:text-white transition">開始選填</button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-teal-200 p-6 hover:shadow-md transition cursor-pointer flex flex-col justify-between border-l-4 border-l-teal-500" onclick="checkDraftAndStart('L6_Cloze')">
+                    <div>
+                        <div class="bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">Lesson 6 閱讀</div>
+                        <h4 class="text-lg font-bold text-gray-800 mb-2">L6 課本文意選填</h4>
+                        <p class="text-sm text-gray-600 mb-4">結和 Lesson 6 課本脈絡的專屬克漏字與文意選填訓練。</p>
+                    </div>
+                    <button class="w-full bg-teal-50 text-teal-600 font-semibold py-2 rounded-lg hover:bg-teal-600 hover:text-white transition">開始選填</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 3: Student Active Quiz -->
+        <div id="view-quiz" class="hidden w-full max-w-3xl fade-in my-6">
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 md:p-8">
+                <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-6">
+                    <div>
+                        <span id="quiz-title" class="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full"></span>
+                        <h3 class="text-lg font-bold text-gray-800 mt-2">請認真作答 (系統即時同步老師端)</h3>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-gray-500 block">進度</span>
+                        <span id="quiz-progress" class="text-lg font-bold text-gray-700">1 / 25</span>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <p id="question-text" class="text-lg font-medium text-gray-800 leading-relaxed"></p>
+                </div>
+
+                <div id="options-container" class="space-y-3 mb-6"></div>
+
+                <div id="text-input-container" class="hidden mb-6">
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">請在下方框內輸入完整的英文單字：</label>
+                        <div class="flex items-center space-x-2">
+                            <span id="spelling-prefix" class="bg-blue-600 text-white font-bold px-4 py-3 rounded-lg text-lg"></span>
+                            <input type="text" id="spelling-input" 
+                                   class="flex-grow px-4 py-3 text-lg font-mono border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none" 
+                                   placeholder="輸入剩餘或完整字母..."
+                                   autocomplete="off" 
+                                   autocorrect="off" 
+                                   autocapitalize="off" 
+                                   spellcheck="false">
+                        </div>
+                    </div>
+                    <button id="btn-submit-text" onclick="submitTextAnswer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow">
+                        確認提交答案
+                    </button>
+                </div>
+
+                <div id="quiz-feedback" class="hidden mb-6 p-4 rounded-xl"></div>
+
+                <div class="flex justify-between items-center border-t border-gray-100 pt-4">
+                    <button onclick="showDashboard()" class="text-gray-500 hover:text-gray-700 text-sm font-medium">暫停並返回選單 (進度已自動儲存)</button>
+                    <button id="btn-next-question" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg transition">下一題 &rarr;</button>
+                    <button id="btn-finish-quiz" class="hidden bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-lg transition">完成測驗並儲存成績</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 4: Student Personal Records -->
+        <div id="view-records" class="hidden w-full max-w-4xl fade-in my-6">
+            <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">個人學習歷程紀錄</h2>
+                        <p class="text-sm text-gray-500 mt-1">包含歷史成績、逐題詳細對答明細與切換視窗紀錄。</p>
+                    </div>
+                    <button onclick="showDashboard()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg transition">返回主選單</button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200 text-gray-600 text-sm">
+                                <th class="p-4">測驗單元</th>
+                                <th class="p-4">完成時間</th>
+                                <th class="p-4">得分</th>
+                                <th class="p-4">狀態/監控</th>
+                                <th class="p-4">詳細對答紀錄</th>
+                            </tr>
+                        </thead>
+                        <tbody id="records-table-body"></tbody>
+                    </table>
+                    <div id="no-records-msg" class="hidden text-center py-8 text-gray-500">尚無任何測驗紀錄。</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 5: Teacher Real-Time Live Dashboard -->
+        <div id="view-teacher-dashboard" class="hidden w-full max-w-6xl fade-in my-6">
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-yellow-200">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-200 pb-4 mb-6 gap-4">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full">教師端控制台</span>
+                            <span class="flex h-3 w-3 relative">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                            </span>
+                            <span class="text-xs text-green-600 font-bold">雲端即時連線中</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900 mt-1">全班作答狀態即時監控面板</h2>
+                    </div>
+                    <button onclick="showDashboard()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg transition text-sm">
+                        退出教師後台
+                    </button>
+                </div>
+
+                <!-- Live Section 1: Active Progress -->
+                <div class="mb-10">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        正在作答中的學生 (Live Progress)
+                    </h3>
+                    <div class="overflow-x-auto bg-gray-50 rounded-xl border border-gray-200">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-100 text-gray-600 border-b border-gray-200">
+                                <tr>
+                                    <th class="p-3.5">學生姓名</th>
+                                    <th class="p-3.5">正在進行單元</th>
+                                    <th class="p-3.5">當前答題進度</th>
+                                    <th class="p-3.5">答對題數</th>
+                                    <th class="p-3.5">切換分頁警示</th>
+                                    <th class="p-3.5">最後更新時間</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teacher-live-tbody">
+                                <tr><td colspan="6" class="p-4 text-center text-gray-400">目前沒有學生正在作答...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Live Section 2: Completed Submissions -->
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                        <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        全班交卷成績與對答紀錄
+                    </h3>
+                    <div class="overflow-x-auto bg-gray-50 rounded-xl border border-gray-200">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-100 text-gray-600 border-b border-gray-200">
+                                <tr>
+                                    <th class="p-3.5">學生姓名</th>
+                                    <th class="p-3.5">測驗單元</th>
+                                    <th class="p-3.5">得分</th>
+                                    <th class="p-3.5">切換分頁次數</th>
+                                    <th class="p-3.5">交卷時間</th>
+                                    <th class="p-3.5">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teacher-records-tbody">
+                                <tr><td colspan="6" class="p-4 text-center text-gray-400">尚無交卷紀錄...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal: Teacher Auth -->
+    <div id="modal-teacher-auth" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center border-t-8 border-yellow-500">
+            <h3 class="text-xl font-bold text-gray-900 mb-2">教師身分驗證</h3>
+            <p class="text-xs text-gray-500 mb-4">請輸入教師登入密碼（預設：<span class="font-mono text-blue-600">teacher123</span>）</p>
+            <input type="password" id="teacher-passcode" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 text-center text-lg outline-none focus:border-yellow-500" placeholder="輸入密碼...">
+            <div class="flex space-x-2">
+                <button onclick="closeTeacherAuthModal()" class="w-1/2 bg-gray-100 text-gray-700 font-bold py-2 rounded-lg hover:bg-gray-200">取消</button>
+                <button onclick="verifyTeacherPasscode()" class="w-1/2 bg-yellow-500 text-gray-900 font-bold py-2 rounded-lg hover:bg-yellow-600 shadow">登入後台</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Resume Progress -->
+    <div id="modal-resume" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border-t-8 border-blue-600">
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">偵測到未完成的答題進度</h3>
+            <p id="resume-description" class="text-gray-600 mb-6 text-sm leading-relaxed"></p>
+            <div class="space-y-3">
+                <button onclick="confirmResumeQuiz()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow">
+                    接續上次進度作答
+                </button>
+                <button onclick="confirmRestartQuiz()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-lg transition">
+                    放棄進度，重新開始
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Detailed Answers Breakdown -->
+    <div id="modal-breakdown" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-3xl w-full max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-4">
+                <div>
+                    <h3 id="breakdown-title" class="text-xl font-bold text-gray-900"></h3>
+                    <p id="breakdown-subtitle" class="text-xs text-gray-500 mt-1"></p>
+                </div>
+                <button onclick="closeBreakdownModal()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+            </div>
+            <div id="breakdown-content" class="flex-grow overflow-y-auto space-y-4 pr-2 text-left"></div>
+            <div class="border-t border-gray-100 pt-4 mt-4 text-right">
+                <button onclick="closeBreakdownModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2 rounded-lg transition">關閉明細</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Warning Modal -->
+    <div id="modal-warning" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border-t-8 border-red-500">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">切換視窗警告</h3>
+            <p class="text-gray-600 mb-6 text-sm leading-relaxed">偵測到您切換分頁或離開測驗畫面！<br><span class="text-red-600 font-semibold">嚴禁使用 AI 工具輔助。</span><br>您的違規切屏紀錄已同步回傳給老師！</p>
+            <button onclick="closeWarningModal()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition">
+                我了解了，返回測驗
+            </button>
+        </div>
+    </div>
+
+    <!-- Message Modal -->
+    <div id="modal-message" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full text-center">
+            <h3 id="modal-message-title" class="text-xl font-bold text-gray-900 mb-2"></h3>
+            <p id="modal-message-text" class="text-gray-600 mb-6 text-sm"></p>
+            <button onclick="closeMessageModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition">確定</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Quiz Data Bank
+        const quizData = {
+            'L4_Grammar': {
+                title: "Lesson 4 文法 25 題完整版",
+                questions: [
+                    { question: "1. The ancient pyramids are believed ________ built thousands of years ago.", options: ["(A) to be", "(B) to being", "(C) to have been", "(D) having been"], answer: 2, explanation: "建造金字塔早於主要動詞are believed，故用 to have been p.p.。" },
+                    { question: "2. I would rather ________ at home reading a book than go out in this heavy rain.", options: ["(A) staying", "(B) stay", "(C) stayed", "(D) to stay"], answer: 1, explanation: "would rather + 原形動詞 + than + 原形動詞。" },
+                    { question: "3. The suspect is said ________ the country before the police issued the warrant.", options: ["(A) to leave", "(B) to leaving", "(C) to have left", "(D) having left"], answer: 2, explanation: "逃離國家發生在過去，早於is said，故使用 to have p.p.。" },
+                    { question: "4. Mary would ________ fail the test than cheat on it.", options: ["(A) better", "(B) prefer", "(C) like", "(D) rather"], answer: 3, explanation: "would rather... than... (寧願...也不願...)。" },
+                    { question: "5. The great fire is reported ________ hundreds of houses last night.", options: ["(A) to destroy", "(B) destroying", "(C) to have destroyed", "(D) destroyed"], answer: 2, explanation: "火災摧毀房屋發生在昨晚，早於現在的報導(is reported)。" },
+                    { question: "6. My brother would rather walk to school ________ take the crowded bus.", options: ["(A) to", "(B) than", "(C) rather", "(D) from"], answer: 1, explanation: "搭配 would rather 的對稱連接詞為 than。" },
+                    { question: "7. Drinking too much sugary beverage is generally thought ________ bad for your health.", options: ["(A) to be", "(B) is", "(C) to have been", "(D) being"], answer: 0, explanation: "表示一般事實，時間一致，用 to be。" },
+                    { question: "8. The students would play basketball outside rather than ________ in the classroom.", options: ["(A) studied", "(B) studying", "(C) study", "(D) to study"], answer: 2, explanation: "would VR rather than VR 句型。" },
+                    { question: "9. The missing boy is believed ________ in the mountains, so the rescue team is searching there now.", options: ["(A) to be hiding", "(B) to have hidden", "(C) hiding", "(D) hide"], answer: 0, explanation: "強調動作「現在正在」進行中，用 to be V-ing。" },
+                    { question: "10. I would rather lose everything ________ live my life without you.", options: ["(A) as", "(B) then", "(C) than", "(D) to"], answer: 2, explanation: "would rather... than... 句型。" },
+                    { question: "11. Arthur is said ________ a fortune in the stock market last year.", options: ["(A) to make", "(B) to have made", "(C) made", "(D) making"], answer: 1, explanation: "賺錢發生在去年(last year)，早於 is said。" },
+                    { question: "12. She would rather ________ the truth than be comforted by a lie.", options: ["(A) known", "(B) knowing", "(C) know", "(D) to know"], answer: 2, explanation: "would rather 後接原形動詞。" },
+                    { question: "13. The castle is thought ________ during the 16th century by a famous king.", options: ["(A) to build", "(B) to be built", "(C) to have been built", "(D) building"], answer: 2, explanation: "建造在16世紀，早於現在的 is thought，且為被動語態。" },
+                    { question: "14. We would rather ________ the game fairly than win by cheating.", options: ["(A) lose", "(B) to lose", "(C) losing", "(D) lost"], answer: 0, explanation: "would rather 後接原形動詞。" },
+                    { question: "15. Eating a balanced diet is known ________ essential for maintaining good health.", options: ["(A) to be", "(B) being", "(C) to have been", "(D) be"], answer: 0, explanation: "表一般事實，用 to be。" },
+                    { question: "16. The singer would rather cancel the concert ________ perform with a sore throat.", options: ["(A) than", "(B) to", "(C) instead", "(D) but"], answer: 0, explanation: "would rather... than... 句型。" },
+                    { question: "17. The rare bird is believed ________ extinct for over 50 years until it was spotted recently.", options: ["(A) to be", "(B) to have been", "(C) being", "(D) been"], answer: 1, explanation: "滅絕超過50年是發生在被發現之前的事實，用完成式。" },
+                    { question: "18. I would rather you ________ me the truth earlier.", options: ["(A) tell", "(B) telling", "(C) had told", "(D) to tell"], answer: 2, explanation: "would rather 接子句時，與過去事實相反用過去完成式(had p.p.)。" },
+                    { question: "19. He would order a pizza ________ cook dinner after a long day at work.", options: ["(A) instead", "(B) rather than", "(C) other than", "(D) more than"], answer: 1, explanation: "would VR rather than VR 句型。" },
+                    { question: "20. The newly discovered painting is said ________ by Leonardo da Vinci.", options: ["(A) to paint", "(B) to be painted", "(C) to have been painted", "(D) painting"], answer: 2, explanation: "達文西作畫為過去事實，用 to have been p.p.。" },
+                    { question: "21. They would rather ________ the meeting than make a hasty decision.", options: ["(A) postpone", "(B) postponing", "(C) postponed", "(D) to postpone"], answer: 0, explanation: "would rather 後接原形動詞。" },
+                    { question: "22. The famous poet is thought ________ many unreleased poems before he died.", options: ["(A) to write", "(B) to have written", "(C) writing", "(D) wrote"], answer: 1, explanation: "寫作行為發生在他死前（過去），早於 is thought。" },
+                    { question: "23. John would ________ a small car rather than buy a luxurious one he cannot afford.", options: ["(A) driving", "(B) to drive", "(C) drive", "(D) driven"], answer: 2, explanation: "would VR rather than VR 句型。" },
+                    { question: "24. It is believed ________ the universe is expanding at a fast rate.", options: ["(A) what", "(B) that", "(C) which", "(D) where"], answer: 1, explanation: "It is believed that + 子句。" },
+                    { question: "25. The general would rather die a meaningful death ________ live a meaningless life.", options: ["(A) then", "(B) than", "(C) to", "(D) but"], answer: 1, explanation: "would rather... than... 句型。" }
+                ]
+            },
+            'L5_Grammar': {
+                title: "Lesson 5 文法 25 題完整版",
+                questions: [
+                    { question: "1. A strange man was seen ________ into the house through the back window last night.", options: ["(A) sneak", "(B) sneaked", "(C) to sneak", "(D) sneaks"], answer: 2, explanation: "感官動詞被動 (was seen) 後接 to VR 強調完整過程。" },
+                    { question: "2. I never watch this touching movie ________ crying.", options: ["(A) with", "(B) without", "(C) instead of", "(D) for"], answer: 1, explanation: "雙重否定：never... without... (每次...必定...)。" },
+                    { question: "3. The little girl was heard ________ beautifully in her room when I walked past.", options: ["(A) to singing", "(B) sing", "(C) singing", "(D) sang"], answer: 2, explanation: "感官動詞被動，強調我走過去時當下「正在」唱歌，用 V-ing。" },
+                    { question: "4. You cannot make an omelet ________ breaking a few eggs.", options: ["(A) without", "(B) by", "(C) unless", "(D) from"], answer: 0, explanation: "雙重否定：cannot... without...。" },
+                    { question: "5. The thief was caught on camera and was seen ________ the jewelry from the safe.", options: ["(A) stealing", "(B) steal", "(C) stole", "(D) to stealing"], answer: 0, explanation: "被監視器拍到當下正在進行的動作，用 V-ing。" },
+                    { question: "6. There is no rule ________ exceptions.", options: ["(A) has", "(B) without", "(C) having", "(D) except"], answer: 1, explanation: "There is no... without... (凡事必有例外)。" },
+                    { question: "7. Several dogs were heard ________ loudly in the alley at midnight.", options: ["(A) bark", "(B) barking", "(C) to barking", "(D) barked"], answer: 1, explanation: "強調半夜正在吠叫的動態，用 V-ing。" },
+                    { question: "8. James never leaves the house ________ double-checking if the door is locked.", options: ["(A) unless", "(B) instead of", "(C) without", "(D) outside"], answer: 2, explanation: "never... without... 雙重否定。" },
+                    { question: "9. The famous actor was seen ________ coffee at a local café yesterday morning.", options: ["(A) drink", "(B) to drinking", "(C) drinking", "(D) drank"], answer: 2, explanation: "強調被看到當下正在喝咖啡，用 V-ing。" },
+                    { question: "10. No success can be achieved ________ hard work and determination.", options: ["(A) with", "(B) without", "(C) by", "(D) through"], answer: 1, explanation: "No... without... 沒有...就不會...。" },
+                    { question: "11. The explosion was so loud that it was heard ________ miles away.", options: ["(A) to happen", "(B) happening", "(C) happened", "(D) happen"], answer: 0, explanation: "聽到發生的完整事實，被動語態用 to VR。" },
+                    { question: "12. She can't speak of her late grandmother ________ tearing up.", options: ["(A) out of", "(B) behind", "(C) without", "(D) beneath"], answer: 2, explanation: "cannot... without... (每次說到必定落淚)。" },
+                    { question: "13. The suspect was seen ________ a black bag into the river before he ran away.", options: ["(A) to throw", "(B) throw", "(C) threw", "(D) thrown"], answer: 0, explanation: "強調丟包包的完整動作，被動語態接 to VR。" },
+                    { question: "14. Don't go out in the heavy rain ________ taking an umbrella.", options: ["(A) with", "(B) except", "(C) without", "(D) besides"], answer: 2, explanation: "祈使句否定 + without。" },
+                    { question: "15. A group of children were heard ________ and laughing happily in the playground.", options: ["(A) play", "(B) playing", "(C) played", "(D) to playing"], answer: 1, explanation: "與 laughing 對稱，強調正在進行，選 playing。" },
+                    { question: "16. I can never listen to that song ________ remembering my high school days.", options: ["(A) without", "(B) for", "(C) by", "(D) to"], answer: 0, explanation: "never... without...。" },
+                    { question: "17. The old man was seen ________ the street slowly with a cane.", options: ["(A) cross", "(B) to crossing", "(C) crossing", "(D) crossed"], answer: 2, explanation: "強調正在過馬路的狀態，用 V-ing。" },
+                    { question: "18. No one can enter the secure facility ________ showing a valid ID card.", options: ["(A) by", "(B) unless", "(C) without", "(D) except"], answer: 2, explanation: "No one can... without... 雙重否定。" },
+                    { question: "19. The baby was heard ________ in the middle of the night, waking up the parents.", options: ["(A) to cry", "(B) cry", "(C) crying", "(D) cried"], answer: 2, explanation: "半夜正在哭鬧，用 V-ing。" },
+                    { question: "20. We cannot truly appreciate the light ________ having experienced the dark.", options: ["(A) with", "(B) within", "(C) without", "(D) unless"], answer: 2, explanation: "cannot... without..." },
+                    { question: "21. A bright meteor was seen ________ across the night sky.", options: ["(A) flash", "(B) flashing", "(C) to flashing", "(D) flashed"], answer: 1, explanation: "流星劃過天際，強調短暫且正在進行的狀態，用 V-ing。" },
+                    { question: "22. You shouldn't make important decisions ________ thinking them through carefully.", options: ["(A) outside", "(B) beyond", "(C) without", "(D) beside"], answer: 2, explanation: "shouldn't... without...。" },
+                    { question: "23. The students were heard ________ the math problem loudly in the library.", options: ["(A) discuss", "(B) discussed", "(C) discussing", "(D) to discussing"], answer: 2, explanation: "強調當下正在討論，用 V-ing。" },
+                    { question: "24. Never take a sick leave ________ informing your homeroom teacher first.", options: ["(A) without", "(B) unless", "(C) except", "(D) despite"], answer: 0, explanation: "Never... without... 雙重否定命令句。" },
+                    { question: "25. The magician was seen ________ a rabbit out of his hat on the stage.", options: ["(A) pull", "(B) to pull", "(C) pulled", "(D) pulling"], answer: 1, explanation: "強調完整表演動作，用 to VR (to pull)。" }
+                ]
+            },
+            'L6_Grammar': {
+                title: "Lesson 6 文法 25 題完整版",
+                questions: [
+                    { question: "1. It was not until the movie ended ________ I realized I had left my phone at home.", options: ["(A) when", "(B) than", "(C) that", "(D) until"], answer: 2, explanation: "強調句型：It is/was not until... that + 子句。" },
+                    { question: "2. Neither the students nor the teacher ________ aware of the sudden change in schedule.", options: ["(A) is", "(B) are", "(C) am", "(D) be"], answer: 0, explanation: "neither A nor B，動詞看靠近的主詞 (teacher 單數)，用 is。" },
+                    { question: "3. ________ not until 1945 that World War II finally came to an end.", options: ["(A) There was", "(B) This was", "(C) It was", "(D) That was"], answer: 2, explanation: "強調句型以 It 開頭。" },
+                    { question: "4. You can have ________ tea or coffee; it's entirely up to you.", options: ["(A) both", "(B) either", "(C) neither", "(D) not only"], answer: 1, explanation: "either A or B (兩者擇一)。" },
+                    { question: "5. It wasn't until she lost her health ________ she started to exercise daily.", options: ["(A) that", "(B) which", "(C) when", "(D) where"], answer: 0, explanation: "It wasn't until... 搭配 that。" },
+                    { question: "6. Either my brother or my parents ________ going to pick you up at the airport tomorrow.", options: ["(A) is", "(B) are", "(C) am", "(D) be"], answer: 1, explanation: "either A or B，動詞看靠近的主詞 (parents 複數)，用 are。" },
+                    { question: "7. It was not until the boss entered the room ________ everyone stopped talking.", options: ["(A) then", "(B) when", "(C) that", "(D) before"], answer: 2, explanation: "強調句型搭配 that。" },
+                    { question: "8. Neither the manager nor his assistants ________ able to solve the technical issue.", options: ["(A) was", "(B) were", "(C) is", "(D) has"], answer: 1, explanation: "動詞看 assistants (複數)，過去式用 were。" },
+                    { question: "9. ________ was not until I met him in person that I found out how tall he is.", options: ["(A) It", "(B) He", "(C) That", "(D) There"], answer: 0, explanation: "強調句開頭為 It。" },
+                    { question: "10. I want ________ fish nor meat for dinner because I am a vegetarian.", options: ["(A) either", "(B) neither", "(C) both", "(D) some"], answer: 1, explanation: "後有 nor，搭配 neither (既不...也不...)。" },
+                    { question: "11. It wasn't until the sun went down ________ the temperature started to drop significantly.", options: ["(A) when", "(B) that", "(C) which", "(D) where"], answer: 1, explanation: "強調句 It wasn't until... that..." },
+                    { question: "12. Either you or I ________ responsible for locking the doors before leaving.", options: ["(A) is", "(B) are", "(C) am", "(D) be"], answer: 2, explanation: "動詞隨最近主詞 (I) 變化，用 am。" },
+                    { question: "13. It is not until people fall ill ________ they truly understand the value of health.", options: ["(A) that", "(B) when", "(C) what", "(D) if"], answer: 0, explanation: "強調句固定使用 that。" },
+                    { question: "14. ________ Toronto nor Vancouver is the capital of Canada; it is Ottawa.", options: ["(A) Either", "(B) Neither", "(C) Both", "(D) Not only"], answer: 1, explanation: "後方有 nor，前方必為 Neither。" },
+                    { question: "15. It wasn't until he apologized sincerely ________ she finally forgave him.", options: ["(A) which", "(B) when", "(C) that", "(D) who"], answer: 2, explanation: "強調句搭配 that。" },
+                    { question: "16. Either the blue shirt or the black pants ________ well with your white jacket.", options: ["(A) go", "(B) goes", "(C) going", "(D) to go"], answer: 0, explanation: "動詞看最近主詞 pants (複數)，用原形動詞 go。" },
+                    { question: "17. ________ was not until she read the letter that she burst into tears.", options: ["(A) This", "(B) That", "(C) It", "(D) There"], answer: 2, explanation: "強調句開頭用 It。" },
+                    { question: "18. Neither the cats nor the dog ________ fed yet; please give them some food.", options: ["(A) has been", "(B) have been", "(C) is", "(D) was"], answer: 0, explanation: "看最近主詞 dog (單數)，且有 yet 表示完成式，用 has been。" },
+                    { question: "19. It wasn't until he moved to a foreign country ________ he realized how much he loved his hometown.", options: ["(A) that", "(B) when", "(C) since", "(D) before"], answer: 0, explanation: "強調句搭配 that。" },
+                    { question: "20. You can submit your application ________ in person or via email.", options: ["(A) either", "(B) neither", "(C) both", "(D) whether"], answer: 0, explanation: "後方有 or，前方用 either。" },
+                    { question: "21. It was not until the rain stopped pouring ________ the baseball game could continue.", options: ["(A) what", "(B) when", "(C) that", "(D) than"], answer: 2, explanation: "強調句搭配 that。" },
+                    { question: "22. Neither money nor fame ________ him true happiness in life.", options: ["(A) bring", "(B) brings", "(C) bringing", "(D) to bring"], answer: 1, explanation: "看最近主詞 fame (不可數單數)，用 brings。" },
+                    { question: "23. It wasn't until midnight ________ the noisy neighbors finally turned off their music.", options: ["(A) when", "(B) that", "(C) while", "(D) before"], answer: 1, explanation: "強調句搭配 that。" },
+                    { question: "24. Either the coach or the players ________ to attend the press conference later.", options: ["(A) has", "(B) have", "(C) having", "(D) had"], answer: 1, explanation: "看最近主詞 players (複數)，用 have。" },
+                    { question: "25. ________ was not until I failed the driving test that I started taking it seriously.", options: ["(A) There", "(B) It", "(C) That", "(D) What"], answer: 1, explanation: "強調句起手式 It。" }
+                ]
+            },
+            'Vocab_Spelling': {
+                title: "單字打字拼寫特訓 (無選單/防自動校正)",
+                questions: [
+                    { type: 'text', question: "【單字拼寫 L4】s o y u o j (令人愉快的)", firstLetter: "j", answer: "joyous", explanation: "正解：joyous (adj.) 令人愉快的" },
+                    { type: 'text', question: "【單字拼寫 L4】c o m p a n y a c (陪伴)", firstLetter: "a", answer: "accompany", explanation: "正解：accompany (v.) 陪伴" },
+                    { type: 'text', question: "【單字拼寫 L4】s e n i t l a e s (基本的、不可或缺的)", firstLetter: "e", answer: "essential", explanation: "正解：essential (adj.) 基本的" },
+                    { type: 'text', question: "【單字拼寫 L4】t p c e c n o (概念)", firstLetter: "c", answer: "concept", explanation: "正解：concept (n.) 概念" },
+                    { type: 'text', question: "【單字拼寫 L4】u n r o m (哀悼)", firstLetter: "m", answer: "mourn", explanation: "正解：mourn (v.) 哀悼" },
+                    { type: 'text', question: "【單字拼寫 L5】m l o s s o b (花朵、開花)", firstLetter: "b", answer: "blossom", explanation: "正解：blossom (n./v.) 花朵、開花" },
+                    { type: 'text', question: "【單字拼寫 L5】d a s c a p l e n (景色、風景)", firstLetter: "l", answer: "landscape", explanation: "正解：landscape (n.) 景色" },
+                    { type: 'text', question: "【單字拼寫 L5】k i n g a e r t b a t h (驚人的、極美的)", firstLetter: "b", answer: "breathtaking", explanation: "正解：breathtaking (adj.) 極美的" },
+                    { type: 'text', question: "【單字拼寫 L5】o n t a t i n s i d e (目的地)", firstLetter: "d", answer: "destination", explanation: "正解：destination (n.) 目的地" },
+                    { type: 'text', question: "【單字拼寫 L6】p e l o s (斜坡、坡地)", firstLetter: "s", answer: "slope", explanation: "正解：slope (n.) 斜坡" },
+                    { type: 'text', question: "【單字拼寫 L6】m a m e l i d (困境)", firstLetter: "d", answer: "dilemma", explanation: "正解：dilemma (n.) 進退兩難的困境" },
+                    { type: 'text', question: "【單字拼寫 L6】v i s o n i e n (想像、展望)", firstLetter: "e", answer: "envision", explanation: "正解：envision (v.) 想像、展望" }
+                ]
+            },
+            'L4_Exam': {
+                title: "Lesson 4 段考綜合測驗",
+                questions: [
+                    { question: "【L4 字彙】We ________ the living room with colorful balloons and flowers to celebrate Grandma's birthday.", options: ["(A) defended", "(B) decorated", "(C) demanded", "(D) destroyed"], answer: 1, explanation: "decorate A with B (用B裝飾A)。" },
+                    { question: "【L4 字彙】There is a close ________ between the fake and the real designer handbags.", options: ["(A) response", "(B) resemblance", "(C) resistance", "(D) restriction"], answer: 1, explanation: "resemblance (相似)。" },
+                    { question: "【L4 文法】Despite denying it, Jim is believed ________ a visit to the casino before going home to his family.", options: ["(A) to have paid", "(B) to pay", "(C) paying", "(D) paid"], answer: 0, explanation: "去賭場發生在過去(before going home)，早於現在被相信，用 to have p.p.。" }
+                ]
+            },
+            'L5_Exam': {
+                title: "Lesson 5 段考綜合測驗",
+                questions: [
+                    { question: "【L5 字彙】At night, the city ________ looked beautiful, with shining lights and colorful billboards everywhere.", options: ["(A) landmark", "(B) landlord", "(C) landscape", "(D) landslide"], answer: 2, explanation: "landscape (風景、景色)。" },
+                    { question: "【L5 字彙】Because of the heavy snow, it took the train two hours longer than usual to reach its ________.", options: ["(A) description", "(B) destination", "(C) destruction", "(D) determination"], answer: 1, explanation: "destination (目的地)。" },
+                    { question: "【L5 文法】Mrs. Kennedy ________ leaves home ________ checking at least twice that the doors are locked.", options: ["(A) doesn't; with", "(B) doesn't; without", "(C) never; with", "(D) never; without"], answer: 3, explanation: "雙重否定 never... without... (不曾...不...)。" }
+                ]
+            },
+            'L6_Exam': {
+                title: "Lesson 6 段考綜合測驗",
+                questions: [
+                    { question: "【L6 字彙】The scientist ________ a future where AI technology makes life much easier for everyone.", options: ["(A) encounters", "(B) envisions", "(C) evaluates", "(D) extinguishes"], answer: 1, explanation: "envision (想像、展望)。" },
+                    { question: "【L6 字彙】Harvey was in a ________ about whether to tell the truth and risk hurting his friend or keep the secret.", options: ["(A) dialogue", "(B) diameter", "(C) dilemma", "(D) diploma"], answer: 2, explanation: "dilemma (進退兩難、困境)。" },
+                    { question: "【L6 文法】It wasn't ________ Jack was seriously ill that he realized the importance of health.", options: ["(A) if", "(B) until", "(C) since", "(D) although"], answer: 1, explanation: "強調句型 It wasn't until... that..." }
+                ]
+            },
+            'L4_Cloze': {
+                title: "Lesson 4 課本文意選填",
+                questions: [
+                    { question: "【L4 閱讀】Have you ever thought about what it would be like to have a deceased loved one return and ________ you to a holiday celebration?", options: ["(A) occasion", "(B) concept", "(C) accompany", "(D) mourn"], answer: 2, explanation: "accompany (v. 陪伴)。" },
+                    { question: "【L4 閱讀】...this is the ________ behind the Mexican festival called the Day of the Dead...", options: ["(A) sorrow", "(B) concept", "(C) joyous", "(D) reunion"], answer: 1, explanation: "concept (n. 概念)。" }
+                ]
+            },
+            'L5_Cloze': {
+                title: "Lesson 5 課本文意選填",
+                questions: [
+                    { question: "【L5 閱讀】In spring, romance is in the air as the city is filled with a sea of pink cherry ________.", options: ["(A) capital", "(B) blossoms", "(C) rustling", "(D) splendor"], answer: 1, explanation: "cherry blossoms (櫻花)。" },
+                    { question: "【L5 閱讀】Kyoto has so much more to feast one's eyes on. Having ________ been the capital of Japan...", options: ["(A) previously", "(B) distinctive", "(C) leisurely", "(D) delicate"], answer: 0, explanation: "previously (adv. 先前地)。" }
+                ]
+            },
+            'L6_Cloze': {
+                title: "Lesson 6 課本文意選填",
+                questions: [
+                    { question: "【L6 閱讀】He slid down a snowy ________ and fell over a cliff edge...", options: ["(A) paths", "(B) bruised", "(C) slope", "(D) crops"], answer: 2, explanation: "slope (n. 斜坡)。" },
+                    { question: "【L6 閱讀】No one else admired Medina's beauty, as she had well-defined features that lacked the ________ the villagers valued.", options: ["(A) peculiar", "(B) smoothness", "(C) opposition", "(D) dilemma"], answer: 1, explanation: "smoothness (n. 平滑)。" }
+                ]
+            }
+        };
+
+        // App variables
+// ... existing code:english_course_system.html
