@@ -6,28 +6,12 @@
     <title>高二英文線上課程與測驗系統 (L4-L6)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(4px);
-        }
+        body { font-family: 'Inter', sans-serif; -webkit-user-select: none; user-select: none; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-backdrop { background-color: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); }
+        .option-btn { word-break: break-word; text-align: left; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
@@ -38,457 +22,528 @@
                 <svg class="w-7 h-7 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                 <h1 class="text-xl font-bold">高二英文 (L4-L6) 雲端學習系統</h1>
             </div>
-            
             <div class="flex items-center space-x-3">
                 <div id="nav-user-info" class="hidden font-medium bg-blue-700 px-3 py-1.5 rounded-full text-sm flex items-center">
-                    <span class="w-2 h-2 rounded-full bg-green-400 mr-2"></span>
-                    學生：<span id="display-student-name" class="font-bold ml-1"></span>
+                    <span class="w-2 h-2 rounded-full bg-green-400 mr-2"></span>學生：<span id="display-student-name" class="font-bold ml-1"></span>
                 </div>
-                <!-- 教師按鈕預設顯示於登入頁，學生登入後會隱藏 -->
-                <button id="btn-teacher-nav" onclick="promptTeacherAuth()" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-3 py-1.5 rounded-lg text-sm transition shadow flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                    教師監控後台
-                </button>
+                <button id="btn-teacher-nav" onclick="promptTeacherAuth()" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-3 py-1.5 rounded-lg text-sm transition shadow flex items-center">教師監控後台</button>
             </div>
         </div>
     </nav>
 
     <main class="flex-grow flex items-center justify-center p-4">
         
-        <!-- View 1: Student Login -->
         <div id="view-login" class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full fade-in border border-gray-100">
             <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                </div>
                 <h2 class="text-2xl font-bold text-gray-800">學生登入驗證</h2>
-                <p class="text-sm text-gray-500 mt-2">請輸入您的真實姓名。系統即時雲端自動存檔並同步進度給老師。</p>
+                <p class="text-sm text-gray-500 mt-2">請輸入真實姓名。系統即時雲端同步進度防斷線。</p>
             </div>
             <div class="space-y-4">
-                <div>
-                    <label for="student-name" class="block text-sm font-semibold text-gray-700 mb-1">姓名 / 學號</label>
-                    <input type="text" id="student-name" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="例如：王小明">
-                </div>
-                <button id="btn-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md flex justify-center items-center">
-                    <span>進入測驗系統</span>
-                </button>
+                <input type="text" id="student-name" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="例如：王小明">
+                <button id="btn-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md">進入測驗系統</button>
             </div>
         </div>
 
-        <!-- View 2: Student Dashboard -->
         <div id="view-dashboard" class="hidden w-full max-w-5xl fade-in my-6">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
-                <div>
-                    <h2 class="text-3xl font-bold text-gray-800">複習與測驗單元</h2>
-                    <p class="text-gray-600 mt-1">請選擇欲練習的單元。答題過程自動存檔，可隨時離線接續寫。</p>
-                </div>
-                <button onclick="showRecords()" class="bg-indigo-600 text-white hover:bg-indigo-700 px-5 py-2.5 rounded-lg font-semibold transition flex items-center shadow">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    查看個人歷史紀錄與對答明細
-                </button>
+                <div><h2 class="text-3xl font-bold text-gray-800">各單元複習與測驗</h2><p class="text-gray-600 mt-1">請選擇欲練習的單元與題型。</p></div>
+                <button onclick="showRecords()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-semibold shadow hover:bg-indigo-700">查看個人歷程與對答明細</button>
             </div>
 
-            <!-- Grammar Modules -->
-            <h3 class="text-xl font-bold text-gray-700 mb-3 flex items-center">
-                <span class="w-2.5 h-6 bg-blue-600 rounded-full mr-2"></span>課本文法專區 (25 題完整版)
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition cursor-pointer flex flex-col justify-between" onclick="checkDraftAndStart('L4_Grammar')">
-                    <div>
-                        <div class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">Lesson 4</div>
-                        <h4 class="text-lg font-bold text-gray-800 mb-2">文法 25 題測驗</h4>
-                    </div>
-                    <button class="w-full bg-blue-50 text-blue-600 font-semibold py-2 rounded-lg hover:bg-blue-600 hover:text-white transition mt-4">開始作答</button>
-                </div>
-                
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition cursor-pointer flex flex-col justify-between" onclick="checkDraftAndStart('L5_Grammar')">
-                    <div>
-                        <div class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">Lesson 5</div>
-                        <h4 class="text-lg font-bold text-gray-800 mb-2">文法 25 題測驗</h4>
-                    </div>
-                    <button class="w-full bg-green-50 text-green-600 font-semibold py-2 rounded-lg hover:bg-green-600 hover:text-white transition mt-4">開始作答</button>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition cursor-pointer flex flex-col justify-between" onclick="checkDraftAndStart('L6_Grammar')">
-                    <div>
-                        <div class="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">Lesson 6</div>
-                        <h4 class="text-lg font-bold text-gray-800 mb-2">文法 25 題測驗</h4>
-                    </div>
-                    <button class="w-full bg-purple-50 text-purple-600 font-semibold py-2 rounded-lg hover:bg-purple-600 hover:text-white transition mt-4">開始作答</button>
-                </div>
+            <h3 class="text-lg font-bold text-gray-700 mb-3 border-l-4 border-blue-600 pl-2">課本文法專區 (單句選擇)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md cursor-pointer hover:border-blue-300" onclick="checkDraftAndStart('L4_Grammar')"><span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Lesson 4</span><h4 class="font-bold">L4 文法 25 題</h4></div>
+                <div class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md cursor-pointer hover:border-blue-300" onclick="checkDraftAndStart('L5_Grammar')"><span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Lesson 5</span><h4 class="font-bold">L5 文法 25 題</h4></div>
+                <div class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md cursor-pointer hover:border-blue-300" onclick="checkDraftAndStart('L6_Grammar')"><span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Lesson 6</span><h4 class="font-bold">L6 文法 25 題</h4></div>
             </div>
 
-            <!-- Interactive Modules -->
-            <h3 class="text-xl font-bold text-gray-700 mb-3 flex items-center">
-                <span class="w-2.5 h-6 bg-red-500 rounded-full mr-2"></span>單字打字特訓與段考綜合挑戰
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white rounded-xl shadow-sm border border-red-200 p-6 hover:shadow-md transition cursor-pointer flex flex-col justify-between border-l-4 border-l-red-500" onclick="checkDraftAndStart('Vocab_Spelling')">
-                    <div>
-                        <div class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">無選單拼字</div>
-                        <h4 class="text-lg font-bold text-gray-800 mb-2">單字打字拼寫特訓</h4>
-                        <p class="text-sm text-gray-600 mb-4">給定首字與提示，鍵盤輸入全字。</p>
-                    </div>
-                    <button class="w-full bg-red-50 text-red-600 font-semibold py-2 rounded-lg hover:bg-red-600 hover:text-white transition">開始打字特訓</button>
-                </div>
+            <h3 class="text-lg font-bold text-gray-700 mb-3 border-l-4 border-red-500 pl-2">單字打字拼寫特訓 (無選項盲打)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md cursor-pointer hover:border-red-300" onclick="checkDraftAndStart('L4_Vocab')"><span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Lesson 4</span><h4 class="font-bold">L4 單字特訓 (25字)</h4></div>
+                <div class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md cursor-pointer hover:border-red-300" onclick="checkDraftAndStart('L5_Vocab')"><span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Lesson 5</span><h4 class="font-bold">L5 單字特訓 (20字)</h4></div>
+                <div class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md cursor-pointer hover:border-red-300" onclick="checkDraftAndStart('L6_Vocab')"><span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Lesson 6</span><h4 class="font-bold">L6 單字特訓 (24字)</h4></div>
+            </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-yellow-200 p-6 hover:shadow-md transition cursor-pointer flex flex-col justify-between border-l-4 border-l-yellow-500" onclick="checkDraftAndStart('Exam_Comprehensive')">
-                    <div>
-                        <div class="bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">綜合模擬</div>
-                        <h4 class="text-lg font-bold text-gray-800 mb-2">L4-L6 段考綜合題庫</h4>
-                        <p class="text-sm text-gray-600 mb-4">文意字彙與綜合測驗。</p>
-                    </div>
-                    <button class="w-full bg-yellow-50 text-yellow-600 font-semibold py-2 rounded-lg hover:bg-yellow-500 hover:text-white transition">開始模擬測驗</button>
-                </div>
+            <h3 class="text-lg font-bold text-gray-700 mb-3 border-l-4 border-yellow-500 pl-2">段考綜合題庫 (含單句與完整題組)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md cursor-pointer hover:border-yellow-300" onclick="checkDraftAndStart('L4_Exam')"><span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Lesson 4</span><h4 class="font-bold">L4 綜合測驗 (20題)</h4></div>
+                <div class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md cursor-pointer hover:border-yellow-300" onclick="checkDraftAndStart('L5_Exam')"><span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Lesson 5</span><h4 class="font-bold">L5 綜合測驗 (20題)</h4></div>
+                <div class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md cursor-pointer hover:border-yellow-300" onclick="checkDraftAndStart('L6_Exam')"><span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Lesson 6</span><h4 class="font-bold">L6 綜合測驗 (20題)</h4></div>
+            </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-teal-200 p-6 hover:shadow-md transition cursor-pointer flex flex-col justify-between border-l-4 border-l-teal-500" onclick="checkDraftAndStart('Cloze_Test')">
-                    <div>
-                        <div class="bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">課文閱讀</div>
-                        <h4 class="text-lg font-bold text-gray-800 mb-2">課本文意選填特訓</h4>
-                        <p class="text-sm text-gray-600 mb-4">L4-L6 課文脈絡克漏字。</p>
-                    </div>
-                    <button class="w-full bg-teal-50 text-teal-600 font-semibold py-2 rounded-lg hover:bg-teal-600 hover:text-white transition">開始文意選填</button>
-                </div>
+            <h3 class="text-lg font-bold text-gray-700 mb-3 border-l-4 border-teal-500 pl-2">課本文意選填 (含段落題組與大題)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md cursor-pointer hover:border-teal-300" onclick="checkDraftAndStart('L4_Cloze')"><span class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Lesson 4</span><h4 class="font-bold">L4 文意選填 (35題)</h4></div>
+                <div class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md cursor-pointer hover:border-teal-300" onclick="checkDraftAndStart('L5_Cloze')"><span class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Lesson 5</span><h4 class="font-bold">L5 文意選填 (20題)</h4></div>
+                <div class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md cursor-pointer hover:border-teal-300" onclick="checkDraftAndStart('L6_Cloze')"><span class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Lesson 6</span><h4 class="font-bold">L6 文意選填 (24題)</h4></div>
             </div>
         </div>
 
-        <!-- View 3: Student Active Quiz -->
-        <div id="view-quiz" class="hidden w-full max-w-3xl fade-in my-6">
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 md:p-8">
-                <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-6">
-                    <div>
-                        <span id="quiz-title" class="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full"></span>
-                        <h3 class="text-lg font-bold text-gray-800 mt-2">請認真作答 (系統即時同步老師端)</h3>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-xs text-gray-500 block">進度</span>
-                        <span id="quiz-progress" class="text-lg font-bold text-gray-700">1 / 25</span>
-                    </div>
+        <div id="view-quiz" class="hidden w-full max-w-4xl fade-in my-6">
+            <div class="bg-white rounded-2xl shadow-lg border p-6 md:p-8">
+                <div class="flex justify-between items-center border-b pb-4 mb-6">
+                    <div><span id="quiz-title" class="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full"></span><h3 class="text-lg font-bold mt-2">請認真作答 (即時同步老師端)</h3></div>
+                    <div class="text-right"><span class="text-xs text-gray-500 block">進度</span><span id="quiz-progress" class="text-lg font-bold"></span></div>
                 </div>
 
-                <!-- 閱讀測驗文章區塊 (預設隱藏) -->
-                <div id="passage-container" class="hidden mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200 text-gray-700 leading-relaxed">
-                    <p id="passage-text"></p>
+                <div id="passage-container" class="hidden mb-6 p-6 bg-slate-50 rounded-xl border border-slate-200 text-gray-800 text-lg leading-relaxed shadow-sm">
+                    <div id="passage-text" class="whitespace-pre-wrap font-medium"></div>
                 </div>
 
-                <div class="mb-6">
-                    <p id="question-text" class="text-lg font-medium text-gray-800 leading-relaxed"></p>
-                </div>
-
+                <div class="mb-6"><p id="question-text" class="text-xl font-bold text-blue-900 leading-relaxed"></p></div>
+                
                 <div id="options-container" class="space-y-3 mb-6"></div>
-
+                
                 <div id="text-input-container" class="hidden mb-6">
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-4">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">請在下方框內輸入完整的英文單字：</label>
+                    <div class="bg-gray-50 p-4 rounded-xl border mb-4">
+                        <label class="block text-sm font-semibold mb-2">請輸入完整單字 (防呆與自動校正已關閉)：</label>
                         <div class="flex items-center space-x-2">
                             <span id="spelling-prefix" class="bg-blue-600 text-white font-bold px-4 py-3 rounded-lg text-lg"></span>
-                            <input type="text" id="spelling-input" 
-                                   class="flex-grow px-4 py-3 text-lg font-mono border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none" 
-                                   placeholder="輸入剩餘或完整字母..."
-                                   autocomplete="off" 
-                                   autocorrect="off" 
-                                   autocapitalize="off" 
-                                   spellcheck="false">
+                            <input type="text" id="spelling-input" class="flex-grow px-4 py-3 text-lg font-mono border-2 rounded-lg focus:border-blue-500 outline-none" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off">
                         </div>
                     </div>
-                    <button id="btn-submit-text" onclick="submitTextAnswer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow">
-                        確認提交答案
-                    </button>
+                    <button id="btn-submit-text" onclick="submitTextAnswer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg">確認提交</button>
                 </div>
 
                 <div id="quiz-feedback" class="hidden mb-6 p-4 rounded-xl"></div>
 
-                <div class="flex justify-between items-center border-t border-gray-100 pt-4">
-                    <button onclick="showDashboard()" class="text-gray-500 hover:text-gray-700 text-sm font-medium">暫停並返回選單 (進度已自動儲存)</button>
-                    <button id="btn-next-question" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg transition">下一題 &rarr;</button>
-                    <button id="btn-finish-quiz" class="hidden bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-lg transition">完成測驗並儲存成績</button>
+                <div class="flex justify-between items-center border-t pt-4">
+                    <button onclick="showDashboard()" class="text-gray-500 text-sm font-medium">暫停並返回選單</button>
+                    <button id="btn-next-question" class="hidden bg-blue-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-md">下一題 &rarr;</button>
+                    <button id="btn-finish-quiz" class="hidden bg-green-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-md">完成測驗</button>
                 </div>
             </div>
         </div>
 
-        <!-- View 4: Student Personal Records -->
         <div id="view-records" class="hidden w-full max-w-4xl fade-in my-6">
-            <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">個人學習歷程紀錄</h2>
-                        <p class="text-sm text-gray-500 mt-1">包含歷史成績、逐題詳細對答明細與切換視窗紀錄。</p>
-                    </div>
-                    <button onclick="showDashboard()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-lg transition">返回主選單</button>
-                </div>
-
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-bold">個人學習歷程紀錄</h2><button onclick="showDashboard()" class="bg-gray-100 px-4 py-2 rounded-lg font-semibold">返回主選單</button></div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-gray-50 border-b border-gray-200 text-gray-600 text-sm">
-                                <th class="p-4">測驗單元</th>
-                                <th class="p-4">完成時間</th>
-                                <th class="p-4">得分</th>
-                                <th class="p-4">狀態/監控</th>
-                                <th class="p-4">詳細對答紀錄</th>
-                            </tr>
-                        </thead>
+                        <thead><tr class="bg-gray-50 border-b text-sm"><th class="p-4">測驗單元</th><th class="p-4">時間</th><th class="p-4">得分</th><th class="p-4">防弊狀態</th><th class="p-4">明細</th></tr></thead>
                         <tbody id="records-table-body"></tbody>
                     </table>
-                    <div id="no-records-msg" class="hidden text-center py-8 text-gray-500">尚無任何測驗紀錄。</div>
+                    <div id="no-records-msg" class="hidden text-center py-8 text-gray-500">尚無紀錄</div>
                 </div>
             </div>
         </div>
 
-        <!-- View 5: Teacher Real-Time Live Dashboard -->
         <div id="view-teacher-dashboard" class="hidden w-full max-w-6xl fade-in my-6">
-            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-yellow-200">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-200 pb-4 mb-6 gap-4">
-                    <div>
-                        <div class="flex items-center space-x-2">
-                            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full">教師端控制台</span>
-                            <span class="flex h-3 w-3 relative">
-                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                              <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                            </span>
-                            <span id="db-status-badge" class="text-xs text-green-600 font-bold">雲端即時連線中</span>
-                        </div>
-                        <h2 class="text-2xl font-bold text-gray-900 mt-1">全班作答狀態即時監控面板</h2>
-                    </div>
-                    <button onclick="exitTeacherDashboard()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg transition text-sm">
-                        退出教師後台
-                    </button>
+            <div class="bg-white rounded-2xl shadow-xl p-6 border border-yellow-200">
+                <div class="flex justify-between items-center border-b pb-4 mb-6">
+                    <div><span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full">教師端控制台</span><h2 class="text-2xl font-bold mt-1">全班作答狀態即時監控面板</h2></div>
+                    <button onclick="exitTeacherDashboard()" class="bg-gray-200 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300">退出教師後台</button>
                 </div>
-
-                <!-- Live Section 1: Active Progress -->
                 <div class="mb-10">
-                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
-                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                        正在作答中的學生 (Live Progress)
-                    </h3>
-                    <div class="overflow-x-auto bg-gray-50 rounded-xl border border-gray-200">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-gray-100 text-gray-600 border-b border-gray-200">
-                                <tr>
-                                    <th class="p-3.5">學生姓名</th>
-                                    <th class="p-3.5">正在進行單元</th>
-                                    <th class="p-3.5">當前答題進度</th>
-                                    <th class="p-3.5">答對題數</th>
-                                    <th class="p-3.5">切換分頁警示</th>
-                                    <th class="p-3.5">最後更新時間</th>
-                                </tr>
-                            </thead>
-                            <tbody id="teacher-live-tbody">
-                                <tr><td colspan="6" class="p-4 text-center text-gray-400">目前沒有學生正在作答...</td></tr>
-                            </tbody>
-                        </table>
+                    <h3 class="text-lg font-bold mb-3 text-green-700">即時作答監控 (Live)</h3>
+                    <div class="overflow-x-auto bg-gray-50 rounded-xl border">
+                        <table class="w-full text-left text-sm"><thead class="bg-gray-100 border-b"><tr><th class="p-3.5">姓名</th><th class="p-3.5">單元</th><th class="p-3.5">進度</th><th class="p-3.5">答對</th><th class="p-3.5">違規警告</th><th class="p-3.5">時間</th></tr></thead><tbody id="teacher-live-tbody"><tr><td colspan="6" class="p-4 text-center text-gray-400">連線中...</td></tr></tbody></table>
                     </div>
                 </div>
-
-                <!-- Live Section 2: Completed Submissions -->
                 <div>
-                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
-                        <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        全班交卷成績與對答紀錄
-                    </h3>
-                    <div class="overflow-x-auto bg-gray-50 rounded-xl border border-gray-200">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-gray-100 text-gray-600 border-b border-gray-200">
-                                <tr>
-                                    <th class="p-3.5">學生姓名</th>
-                                    <th class="p-3.5">測驗單元</th>
-                                    <th class="p-3.5">得分</th>
-                                    <th class="p-3.5">切換分頁次數</th>
-                                    <th class="p-3.5">交卷時間</th>
-                                    <th class="p-3.5">操作</th>
-                                </tr>
-                            </thead>
-                            <tbody id="teacher-records-tbody">
-                                <tr><td colspan="6" class="p-4 text-center text-gray-400">尚無交卷紀錄...</td></tr>
-                            </tbody>
-                        </table>
+                    <h3 class="text-lg font-bold mb-3 text-blue-700">全班交卷紀錄與獨立考卷檔案</h3>
+                    <div class="overflow-x-auto bg-gray-50 rounded-xl border">
+                        <table class="w-full text-left text-sm"><thead class="bg-gray-100 border-b"><tr><th class="p-3.5">姓名</th><th class="p-3.5">單元</th><th class="p-3.5">得分</th><th class="p-3.5">違規</th><th class="p-3.5">交卷時間</th><th class="p-3.5">操作</th></tr></thead><tbody id="teacher-records-tbody"><tr><td colspan="6" class="p-4 text-center text-gray-400">連線中...</td></tr></tbody></table>
                     </div>
                 </div>
-
             </div>
         </div>
 
     </main>
 
-    <!-- Modal: Teacher Auth -->
     <div id="modal-teacher-auth" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center border-t-8 border-yellow-500">
-            <h3 class="text-xl font-bold text-gray-900 mb-2">教師身分驗證</h3>
-            <p class="text-xs text-gray-500 mb-4">請輸入教師登入密碼</p>
-            <input type="password" id="teacher-passcode" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 text-center text-lg outline-none focus:border-yellow-500" placeholder="輸入密碼...">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center border-t-8 border-yellow-500">
+            <h3 class="text-xl font-bold mb-4">教師登入</h3>
+            <input type="password" id="teacher-passcode" class="w-full px-4 py-2 border rounded-lg mb-4 text-center" placeholder="驗證身分">
             <div class="flex space-x-2">
-                <button onclick="closeTeacherAuthModal()" class="w-1/2 bg-gray-100 text-gray-700 font-bold py-2 rounded-lg hover:bg-gray-200">取消</button>
-                <button onclick="verifyTeacherPasscode()" class="w-1/2 bg-yellow-500 text-gray-900 font-bold py-2 rounded-lg hover:bg-yellow-600 shadow">登入後台</button>
+                <button onclick="closeTeacherAuthModal()" class="w-1/2 bg-gray-100 py-2 rounded-lg font-bold hover:bg-gray-200">取消</button>
+                <button onclick="verifyTeacherPasscode()" class="w-1/2 bg-yellow-500 py-2 rounded-lg font-bold hover:bg-yellow-600">進入</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Resume Progress -->
     <div id="modal-resume" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border-t-8 border-blue-600">
-            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-2">偵測到未完成的答題進度</h3>
-            <p id="resume-description" class="text-gray-600 mb-6 text-sm leading-relaxed"></p>
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full text-center border-t-8 border-blue-600">
+            <h3 class="text-2xl font-bold mb-2">未完成進度</h3>
+            <p id="resume-description" class="text-gray-600 mb-6 text-sm"></p>
             <div class="space-y-3">
-                <button onclick="confirmResumeQuiz()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow">
-                    接續上次進度作答
-                </button>
-                <button onclick="confirmRestartQuiz()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-lg transition">
-                    放棄進度，重新開始
-                </button>
+                <button onclick="confirmResumeQuiz()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700">接續作答</button>
+                <button onclick="confirmRestartQuiz()" class="w-full bg-gray-100 font-semibold py-2.5 rounded-lg hover:bg-gray-200">放棄重來</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Detailed Answers Breakdown -->
     <div id="modal-breakdown" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-3xl w-full max-h-[85vh] flex flex-col">
-            <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-4">
-                <div>
-                    <h3 id="breakdown-title" class="text-xl font-bold text-gray-900"></h3>
-                    <p id="breakdown-subtitle" class="text-xs text-gray-500 mt-1"></p>
-                </div>
-                <button onclick="closeBreakdownModal()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+        <div class="bg-white rounded-2xl p-6 md:p-8 max-w-3xl w-full max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-4 mb-4">
+                <div><h3 id="breakdown-title" class="text-xl font-bold"></h3><p id="breakdown-subtitle" class="text-xs text-gray-500 mt-1"></p></div>
+                <button onclick="closeBreakdownModal()" class="text-xl font-bold text-gray-400 hover:text-gray-800">&times;</button>
             </div>
-            <div id="breakdown-content" class="flex-grow overflow-y-auto space-y-4 pr-2 text-left"></div>
-            <div class="border-t border-gray-100 pt-4 mt-4 text-right">
-                <button onclick="closeBreakdownModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2 rounded-lg transition">關閉考卷明細</button>
-            </div>
+            <div id="breakdown-content" class="flex-grow overflow-y-auto space-y-4 pr-2"></div>
+            <div class="border-t pt-4 mt-4 text-right"><button onclick="closeBreakdownModal()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold">關閉</button></div>
         </div>
     </div>
 
-    <!-- Warning Modal -->
     <div id="modal-warning" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border-t-8 border-red-500">
-            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-2">切換視窗警告</h3>
-            <p class="text-gray-600 mb-6 text-sm leading-relaxed">偵測到您切換分頁或離開測驗畫面！<br><span class="text-red-600 font-semibold">嚴禁使用 AI 工具輔助。</span><br>您的違規切屏紀錄已回傳！</p>
-            <button onclick="closeWarningModal()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition">
-                我了解了，返回測驗
-            </button>
-        </div>
-    </div>
-
-    <!-- Message Modal -->
-    <div id="modal-message" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full text-center">
-            <h3 id="modal-message-title" class="text-xl font-bold text-gray-900 mb-2"></h3>
-            <p id="modal-message-text" class="text-gray-600 mb-6 text-sm"></p>
-            <button onclick="closeMessageModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition">確定</button>
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full text-center border-t-8 border-red-500">
+            <h3 class="text-2xl font-bold mb-2 text-red-600">⚠️ 切換視窗警告</h3>
+            <p class="text-gray-600 mb-6 text-sm">系統偵測到切換分頁或離開測驗畫面！<br>違規紀錄已回傳至教師端。</p>
+            <button onclick="closeWarningModal()" class="w-full bg-red-600 text-white font-bold py-3 rounded-lg hover:bg-red-700">我了解了，返回測驗</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 這是您專屬的 Firebase 金鑰
         const firebaseConfig = {
-            apiKey: "AIzaSyCauX-RRzjdPJntpZULukLwa4D12SY6k0E",
-            authDomain: "november-senior-english-e-l.firebaseapp.com",
-            projectId: "november-senior-english-e-l",
-            storageBucket: "november-senior-english-e-l.firebasestorage.app",
-            messagingSenderId: "661992781814",
-            appId: "1:661992781814:web:b788a3194ca3c5cadab9d7",
-            measurementId: "G-K66QGYX014"
+            apiKey: "AIzaSyCauX-RRzjdPJntpZULukLwa4D12SY6k0E", authDomain: "november-senior-english-e-l.firebaseapp.com",
+            projectId: "november-senior-english-e-l", storageBucket: "november-senior-english-e-l.firebasestorage.app",
+            messagingSenderId: "661992781814", appId: "1:661992781814:web:b788a3194ca3c5cadab9d7"
         };
 
-        // Quiz Data Bank
+        const EX4_TXT = `In early October, I received something special in the mail. It was a postcard with my name and address written on it, and it came all the way from Merida, Mexico. I ___16___ the handwriting right away because it belonged to my good friend Pedro. He invited me to join him for the Day of the Dead, a major annual Mexican festival to remember ___17___ who are no longer with us.
+Mexicans do not fear death. ___18___, they have embraced and celebrated this fact of life for centuries with street parades, all-night parties, and special dishes like pibipollo. This, by the way, is chicken wrapped and steamed in banana leaves and is believed ___19___ just as popular among the dead as among the living! Of course, I was dying to see all of this in person, so just three weeks later I was on a plane ___20___ Mexico. Needless to say, I had my scary costume packed!`;
+        const EX5_TXT = `Dear Allie, Your mom said you are planning a trip to Japan and asked me to email you about our trip last year. We had a great time seeing the sights and eating tons of sushi. Everywhere we went was wonderful, but Kyoto really ___16___ as the best. People say Kyoto is beautiful no matter what the season is, but I think we were very lucky to be there in spring. It felt magical to walk through the temple areas with cherry trees ___17___ all around us.
+Speaking of temples, Kinkaku-ji must be the most incredible place I've ever seen. When I first sighted the golden pavilion shining in the distance through the trees, I was amazed. I spent two hours ___18___ pictures of the pavilion and its reflection in the pond in front of it. I've attached a few of the photos to this email for you to see. ___19___ though, even my best pictures can't show just how beautiful this place was. Whatever you do, don't go to Japan ___20___ Kyoto, or you would be missing out on so much. Let me know how your trip goes! Love, Dad`;
+        const EX6_TXT = `My name is Nuñez, and I am a mountain climber. I had a strange adventure many years ago. While climbing a mountain in South America, I lost my balance and fell, ___16___ myself badly. Even though I was in pain and shock, I kept moving to explore the valley.
+After a while, I reached a small, unusual village. The houses were painted in strange ways, and the streets had low walls along their sides. At first, I was confused, but soon, I realized that everyone there was blind.
+A kind elderly man named Yacob had been ___17___ me since I arrived. He showed me how the people there lived using other senses instead of sight. I was amazed ___18___ how well these people could live without being able to see. Then, I met a beautiful girl named Medina. I thought I was falling in love.
+However, the villagers did not believe that I could see. They thought I was ___19___ dishonest or crazy and that sight was not real. Even Medina didn't believe me, and she insisted that I remove my eyes to ___20___ to life in the village. It broke my heart to leave Medina, but I knew I couldn't give up my sight. Finally, I escaped from the village on the morning of my surgery.`;
+
+        const CL4_1 = `【單字庫】(A) occasion  (B) concept  (C) sorrow  (D) accompany  (E) reunion  (F) essential  (G) mourn  (H) joyous\nHave you ever thought about what it would be like to have a deceased loved one return and (1) ________ you to a holiday celebration? The idea may scare you to death or at least make your hair stand on end, but this is the (2) ________ (3) ________ behind the Mexican festival called the Day of the Dead, when people celebrate death with joy and humor rather than (4) ________ it with (5) ________. On this (6) ________ (7) ________, family members gather for a (8) ________ in honor of those who have moved on to the afterlife.`;
+        const CL4_2 = `【單字庫】(A) dawn  (B) reception  (C) arrival  (D) transforming  (E) preference  (F) anticipate  (G) feast  (H) decorate\n...Instead of fearing these spirits, Mexicans (1) ________ their (2) ________ and prepare for it by purchasing necessary items in local markets in advance. ... On the altars, they place photographs of their deceased loved ones as well as beverages and dishes that those family members had a (3) ________ for while alive. After this warm (4) ________ for the souls at home, it is usually late in the evening, and families head to the cemetery, where they (5) ________ the graves of their loved ones and light one candle for each dead person. Cheerful and merry, they (6) ________ with the honored souls and pray till (7) ________, (8) ________ the normally horrifying graveyard into a venue of joy and celebration for the entire night.`;
+        const CL4_3 = `【單字庫】(A) escape  (B) recognizing  (C) annual  (D) cycle  (E) mocking  (F) inevitable  (G) awaits  (H) participate  (I) resemble\nMany people also dress up in skeleton costumes, paint their faces to (1) ________ skulls, and (2) ________ in performances and street parades. While doing so, Mexicans aren't (3) ________ death. Instead, they are (4) ________ it as an (5) ________ part of the natural (6) ________ and would rather embrace it than ignore it. ... The Mexican Day of the Dead is an (7) ________ national event that brings together living hosts and non-living guests of honor. Hopefully, this tradition will never die out, since it helps people accept a fact of life that (8) ________ us all. If we cannot (9) ________ death, why not celebrate it?`;
+        const CL4_4 = `【單字庫】(A) throughout (B) in (C) resemble (D) joyous (E) honor (F) accompany (G) for (H) sorrowful (I) occasion (J) essential\nOne of the most common traditions shared around the world is a yearly festival for the dead. It seems natural that a festival about death would be __21__, but usually this is not the case. Often, in fact, things are quite __22__, with feasting and dancing. This is certainly true in Japan; people there celebrate Bon every summer. This festival, held in __23__ of departed ancestors, has been observed for many centuries.
+The main feature of the __24__ is a dance called the Bon Odori. This dance provides a reception __25__ the spirits who return. Places __26__ Japan have their unique style of dance and music. For example, in a mining area, the dance might __27__ the movements of miners. Most dances have some __28__ aspects that are the same. Dancers dress up __29__ traditional clothing and usually hold a fan or small towel to wave while dancing. The end of Bon features giant fires to __30__ the spirits as they leave the world. These fires burn across the country for Japan's biggest festival.`;
+
         const quizData = {
             'L4_Grammar': {
-                title: "Lesson 4 文法 25 題完整版",
+                title: "L4 文法測驗",
                 questions: [
-                    { question: "1. The ancient pyramids are believed ________ built thousands of years ago.", options: ["(A) to be", "(B) to being", "(C) to have been", "(D) having been"], answer: 2, explanation: "建造金字塔早於主要動詞are believed，故用 to have been p.p.。" },
-                    { question: "2. I would rather ________ at home reading a book than go out in this heavy rain.", options: ["(A) staying", "(B) stay", "(C) stayed", "(D) to stay"], answer: 1, explanation: "would rather + 原形動詞 + than + 原形動詞。" },
-                    { question: "3. The suspect is said ________ the country before the police issued the warrant.", options: ["(A) to leave", "(B) to leaving", "(C) to have left", "(D) having left"], answer: 2, explanation: "逃離國家發生在過去，早於is said，故使用 to have p.p.。" }
-                    // ... 在此為了範例長度縮減，您可以隨時在陣列內擴充剩下的22題
+                    {q: "1. The ancient pyramids are believed ______ built thousands of years ago.", o: ["(A) to be", "(B) to being", "(C) to have been", "(D) having been"], a: 2, e: "正解: (C)"},
+                    {q: "2. I would rather ________ at home reading a book than go out in this heavy rain.", o: ["(A) staying", "(B) stay", "(C) stayed", "(D) to stay"], a: 1, e: "正解: (B)"},
+                    {q: "3. The suspect is said _____ the country before the police issued the warrant.", o: ["(A) to leave", "(B) to leaving", "(C) to have left", "(D) having left"], a: 2, e: "正解: (C)"},
+                    {q: "4. Mary would ________ fail the test than cheat on it.", o: ["(A) better", "(B) prefer", "(C) like", "(D) rather"], a: 3, e: "正解: (D)"},
+                    {q: "5. The great fire is reported ________ hundreds of houses last night.", o: ["(A) to destroy", "(B) destroying", "(C) to have destroyed", "(D) destroyed"], a: 2, e: "正解: (C)"},
+                    {q: "6. My brother would rather walk to school_____ take the crowded bus.", o: ["(A) to", "(B) than", "(C) rather", "(D) from"], a: 1, e: "正解: (B)"},
+                    {q: "7. Drinking too much sugary beverage is generally thought ________ bad for your health.", o: ["(A) to be", "(B) is", "(C) to have been", "(D) being"], a: 0, e: "正解: (A)"},
+                    {q: "8. The students would play basketball outside rather than ________ in the classroom.", o: ["(A) studied", "(B) studying", "(C) study", "(D) to study"], a: 2, e: "正解: (C)"},
+                    {q: "9. The missing boy is believed ________ in the mountains, so the rescue team is searching there now.", o: ["(A) to be hiding", "(B) to have hidden", "(C) hiding", "(D) hide"], a: 0, e: "正解: (A)"},
+                    {q: "10. I would rather lose everything ________ live my life without you.", o: ["(A) as", "(B) then", "(C) than", "(D) to"], a: 2, e: "正解: (C)"},
+                    {q: "11. Arthur is said ________ a fortune in the stock market last year.", o: ["(A) to make", "(B) to have made", "(C) made", "(D) making"], a: 1, e: "正解: (B)"},
+                    {q: "12. She would rather ________ the truth than be comforted by a lie.", o: ["(A) known", "(B) knowing", "(C) know", "(D) to know"], a: 2, e: "正解: (C)"},
+                    {q: "13. The castle is thought ____ during the 16th century by a famous king.", o: ["(A) to build", "(B) to be built", "(C) to have been built", "(D) building"], a: 2, e: "正解: (C)"},
+                    {q: "14. We would rather ________ the game fairly than win by cheating.", o: ["(A) lose", "(B) to lose", "(C) losing", "(D) lost"], a: 0, e: "正解: (A)"},
+                    {q: "15. Eating a balanced diet is known ________ essential for maintaining good health.", o: ["(A) to be", "(B) being", "(C) to have been", "(D) be"], a: 0, e: "正解: (A)"},
+                    {q: "16. The singer would rather cancel the concert ________ perform with a sore throat.", o: ["(A) than", "(B) to", "(C) instead", "(D) but"], a: 0, e: "正解: (A)"},
+                    {q: "17. The rare bird is believed ________ extinct for over 50 years until it was spotted recently.", o: ["(A) to be", "(B) to have been", "(C) being", "(D) been"], a: 1, e: "正解: (B)"},
+                    {q: "18. I would rather you ________ me the truth earlier.", o: ["(A) tell", "(B) telling", "(C) had told", "(D) to tell"], a: 2, e: "正解: (C)"},
+                    {q: "19. He would order a pizza ________ cook dinner after a long day at work.", o: ["(A) instead", "(B) rather than", "(C) other than", "(D) more than"], a: 1, e: "正解: (B)"},
+                    {q: "20. The newly discovered painting is said _____ by Leonardo da Vinci.", o: ["(A) to paint", "(B) to be painted", "(C) to have been painted", "(D) painting"], a: 2, e: "正解: (C)"},
+                    {q: "21. They would rather ________ the meeting than make a hasty decision.", o: ["(A) postpone", "(B) postponing", "(C) postponed", "(D) to postpone"], a: 0, e: "正解: (A)"},
+                    {q: "22. The famous poet is thought ________ many unreleased poems before he died.", o: ["(A) to write", "(B) to have written", "(C) writing", "(D) wrote"], a: 1, e: "正解: (B)"},
+                    {q: "23. John would ________ a small car rather than buy a luxurious one he cannot afford.", o: ["(A) driving", "(B) to drive", "(C) drive", "(D) driven"], a: 2, e: "正解: (C)"},
+                    {q: "24. It is believed ________ the universe is expanding at a fast rate.", o: ["(A) what", "(B) that", "(C) which", "(D) where"], a: 1, e: "正解: (B)"},
+                    {q: "25. The general would rather die a meaningful death ________ live a meaningless life.", o: ["(A) then", "(B) than", "(C) to", "(D) but"], a: 1, e: "正解: (B)"}
                 ]
             },
             'L5_Grammar': {
-                title: "Lesson 5 文法 25 題完整版",
+                title: "L5 文法測驗",
                 questions: [
-                    { question: "1. A strange man was seen ________ into the house through the back window last night.", options: ["(A) sneak", "(B) sneaked", "(C) to sneak", "(D) sneaks"], answer: 2, explanation: "感官動詞被動 (was seen) 後接 to VR 強調完整過程。" },
-                    { question: "2. I never watch this touching movie ________ crying.", options: ["(A) with", "(B) without", "(C) instead of", "(D) for"], answer: 1, explanation: "雙重否定：never... without... (每次...必定...)。" },
-                    { question: "3. The little girl was heard ________ beautifully in her room when I walked past.", options: ["(A) to singing", "(B) sing", "(C) singing", "(D) sang"], answer: 2, explanation: "感官動詞被動，強調我走過去時當下「正在」唱歌，用 V-ing。" }
+                    {q: "1. A strange man was seen ________ into the house through the back window last night.", o: ["(A) sneak", "(B) sneaked", "(C) to sneak", "(D) sneaks"], a: 2, e: "正解: (C)"},
+                    {q: "2. I never watch this touching movie ________ crying.", o: ["(A) with", "(B) without", "(C) instead of", "(D) for"], a: 1, e: "正解: (B)"},
+                    {q: "3. The little girl was heard ________ beautifully in her room when I walked past.", o: ["(A) to singing", "(B) sing", "(C) singing", "(D) sang"], a: 2, e: "正解: (C)"},
+                    {q: "4. You cannot make an omelet ________ breaking a few eggs.", o: ["(A) without", "(B) by", "(C) unless", "(D) from"], a: 0, e: "正解: (A)"},
+                    {q: "5. The thief was caught on camera and was seen ________ the jewelry from the safe.", o: ["(A) stealing", "(B) steal", "(C) stole", "(D) to stealing"], a: 0, e: "正解: (A)"},
+                    {q: "6. There is no rule ________ exceptions.", o: ["(A) has", "(B) without", "(C) having", "(D) except"], a: 1, e: "正解: (B)"},
+                    {q: "7. Several dogs were heard ________ loudly in the alley at midnight.", o: ["(A) bark", "(B) barking", "(C) to barking", "(D) barked"], a: 1, e: "正解: (B)"},
+                    {q: "8. James never leaves the house ________ double-checking if the door is locked.", o: ["(A) unless", "(B) instead of", "(C) without", "(D) outside"], a: 2, e: "正解: (C)"},
+                    {q: "9. The famous actor was seen ________ coffee at a local café yesterday morning.", o: ["(A) drink", "(B) to drinking", "(C) drinking", "(D) drank"], a: 2, e: "正解: (C)"},
+                    {q: "10. No success can be achieved ________ hard work and determination.", o: ["(A) with", "(B) without", "(C) by", "(D) through"], a: 1, e: "正解: (B)"},
+                    {q: "11. The explosion was so loud that it was heard ________ miles away.", o: ["(A) to happen", "(B) happening", "(C) happened", "(D) happen"], a: 0, e: "正解: (A)"},
+                    {q: "12. She can't speak of her late grandmother ________ tearing up.", o: ["(A) out of", "(B) behind", "(C) without", "(D) beneath"], a: 2, e: "正解: (C)"},
+                    {q: "13. The suspect was seen ________ a black bag into the river before he ran away.", o: ["(A) to throw", "(B) throw", "(C) threw", "(D) thrown"], a: 0, e: "正解: (A)"},
+                    {q: "14. Don't go out in the heavy rain ________ taking an umbrella.", o: ["(A) with", "(B) except", "(C) without", "(D) besides"], a: 2, e: "正解: (C)"},
+                    {q: "15. A group of children were heard ________ and laughing happily in the playground.", o: ["(A) play", "(B) playing", "(C) played", "(D) to playing"], a: 1, e: "正解: (B)"},
+                    {q: "16. I can never listen to that song ________ remembering my high school days.", o: ["(A) without", "(B) for", "(C) by", "(D) to"], a: 0, e: "正解: (A)"},
+                    {q: "17. The old man was seen ________ the street slowly with a cane.", o: ["(A) cross", "(B) to crossing", "(C) crossing", "(D) crossed"], a: 2, e: "正解: (C)"},
+                    {q: "18. No one can enter the secure facility ________ showing a valid ID card.", o: ["(A) by", "(B) unless", "(C) without", "(D) except"], a: 2, e: "正解: (C)"},
+                    {q: "19. The baby was heard ________ in the middle of the night, waking up the parents.", o: ["(A) to cry", "(B) cry", "(C) crying", "(D) cried"], a: 2, e: "正解: (C)"},
+                    {q: "20. We cannot truly appreciate the light ________ having experienced the dark.", o: ["(A) with", "(B) within", "(C) without", "(D) unless"], a: 2, e: "正解: (C)"},
+                    {q: "21. A bright meteor was seen ________ across the night sky.", o: ["(A) flash", "(B) flashing", "(C) to flashing", "(D) flashed"], a: 0, e: "正解: (A)"},
+                    {q: "22. You shouldn't make important decisions ________ thinking them through carefully.", o: ["(A) outside", "(B) beyond", "(C) without", "(D) beside"], a: 2, e: "正解: (C)"},
+                    {q: "23. The students were heard ________ the math problem loudly in the library.", o: ["(A) discuss", "(B) discussed", "(C) discussing", "(D) to discussing"], a: 2, e: "正解: (C)"},
+                    {q: "24. Never take a sick leave ________ informing your homeroom teacher first.", o: ["(A) without", "(B) unless", "(C) except", "(D) despite"], a: 0, e: "正解: (A)"},
+                    {q: "25. The magician was seen ______ a rabbit out of his hat on the stage.", o: ["(A) pull", "(B) to pull", "(C) pulled", "(D) pulling"], a: 1, e: "正解: (B)"}
                 ]
             },
             'L6_Grammar': {
-                title: "Lesson 6 文法 25 題完整版",
+                title: "L6 文法測驗",
                 questions: [
-                    { question: "1. It was not until the movie ended ________ I realized I had left my phone at home.", options: ["(A) when", "(B) than", "(C) that", "(D) until"], answer: 2, explanation: "強調句型：It is/was not until... that + 子句。" },
-                    { question: "2. Neither the students nor the teacher ________ aware of the sudden change in schedule.", options: ["(A) is", "(B) are", "(C) am", "(D) be"], answer: 0, explanation: "neither A nor B，動詞看靠近的主詞 (teacher 單數)，用 is。" },
-                    { question: "3. ________ not until 1945 that World War II finally came to an end.", options: ["(A) There was", "(B) This was", "(C) It was", "(D) That was"], answer: 2, explanation: "強調句型以 It 開頭。" }
+                    {q: "1. It was not until the movie ended ________ I realized I had left my phone at home.", o: ["(A) when", "(B) than", "(C) that", "(D) until"], a: 2, e: "正解: (C)"},
+                    {q: "2. Neither the students nor the teacher ________ aware of the sudden change in schedule.", o: ["(A) is", "(B) are", "(C) am", "(D) be"], a: 0, e: "正解: (A)"},
+                    {q: "3. ________ not until 1945 that World War II finally came to an end.", o: ["(A) There was", "(B) This was", "(C) It was", "(D) That was"], a: 2, e: "正解: (C)"},
+                    {q: "4. You can have ________ tea or coffee; it's entirely up to you.", o: ["(A) both", "(B) either", "(C) neither", "(D) not only"], a: 1, e: "正解: (B)"},
+                    {q: "5. It wasn't until she lost her health _____ she started to exercise daily.", o: ["(A) that", "(B) which", "(C) when", "(D) where"], a: 0, e: "正解: (A)"},
+                    {q: "6. Either my brother or my parents ________ going to pick you up at the airport tomorrow.", o: ["(A) is", "(B) are", "(C) am", "(D) be"], a: 1, e: "正解: (B)"},
+                    {q: "7. It was not until the boss entered the room ________ everyone stopped talking.", o: ["(A) then", "(B) when", "(C) that", "(D) before"], a: 2, e: "正解: (C)"},
+                    {q: "8. Neither the manager nor his assistants ________ able to solve the technical issue.", o: ["(A) was", "(B) were", "(C) is", "(D) has"], a: 1, e: "正解: (B)"},
+                    {q: "9. ___ was not until I met him in person that I found out how tall he is.", o: ["(A) It", "(B) He", "(C) That", "(D) There"], a: 0, e: "正解: (A)"},
+                    {q: "10. I want ________ fish nor meat for dinner because I am a vegetarian.", o: ["(A) either", "(B) neither", "(C) both", "(D) some"], a: 1, e: "正解: (B)"},
+                    {q: "11. It wasn't until the sun went down ________ the temperature started to drop significantly.", o: ["(A) when", "(B) that", "(C) which", "(D) where"], a: 1, e: "正解: (B)"},
+                    {q: "12. Either you or I ____ responsible for locking the doors before leaving.", o: ["(A) is", "(B) are", "(C) am", "(D) be"], a: 2, e: "正解: (C)"},
+                    {q: "13. It is not until people fall ill ________ they truly understand the value of health.", o: ["(A) that", "(B) when", "(C) what", "(D) if"], a: 0, e: "正解: (A)"},
+                    {q: "14. ________ Toronto nor Vancouver is the capital of Canada; it is Ottawa.", o: ["(A) Either", "(B) Neither", "(C) Both", "(D) Not only"], a: 1, e: "正解: (B)"},
+                    {q: "15. It wasn't until he apologized sincerely ____ she finally forgave him.", o: ["(A) which", "(B) when", "(C) that", "(D) who"], a: 2, e: "正解: (C)"},
+                    {q: "16. Either the blue shirt or the black pants ________ well with your white jacket.", o: ["(A) go", "(B) goes", "(C) going", "(D) to go"], a: 0, e: "正解: (A)"},
+                    {q: "17. _______ was not until she read the letter that she burst into tears.", o: ["(A) This", "(B) That", "(C) It", "(D) There"], a: 2, e: "正解: (C)"},
+                    {q: "18. Neither the cats nor the dog ___ fed yet; please give them some food.", o: ["(A) has been", "(B) have been", "(C) is", "(D) was"], a: 0, e: "正解: (A)"},
+                    {q: "19. It wasn't until he moved to a foreign country _______ he realized how much he loved his hometown.", o: ["(A) that", "(B) when", "(C) since", "(D) before"], a: 0, e: "正解: (A)"},
+                    {q: "20. You can submit your application ________ in person or via email.", o: ["(A) either", "(B) neither", "(C) both", "(D) whether"], a: 0, e: "正解: (A)"},
+                    {q: "21. It was not until the rain stopped pouring ________ the baseball game could continue.", o: ["(A) what", "(B) when", "(C) that", "(D) than"], a: 2, e: "正解: (C)"},
+                    {q: "22. Neither money nor fame ________ him true happiness in life.", o: ["(A) bring", "(B) brings", "(C) bringing", "(D) to bring"], a: 1, e: "正解: (B)"},
+                    {q: "23. It wasn't until midnight ________ the noisy neighbors finally turned off their music.", o: ["(A) when", "(B) that", "(C) while", "(D) before"], a: 1, e: "正解: (B)"},
+                    {q: "24. Either the coach or the players ________ to attend the press conference later.", o: ["(A) has", "(B) have", "(C) having", "(D) had"], a: 1, e: "正解: (B)"},
+                    {q: "25. ________ was not until I failed the driving test that I started taking it seriously.", o: ["(A) There", "(B) It", "(C) That", "(D) What"], a: 1, e: "正解: (B)"}
                 ]
             },
-            'Vocab_Spelling': {
-                title: "單字打字拼寫特訓 (無選單/防自動校正)",
+            'L4_Vocab': {
+                title: "L4 單字特訓",
                 questions: [
-                    { type: 'text', question: "【單字拼寫 L4】s o y u o j (令人愉快的)", firstLetter: "j", answer: "joyous", explanation: "正解：joyous (adj.) 令人愉快的" },
-                    { type: 'text', question: "【單字拼寫 L4】c o m p a n y a c (陪伴)", firstLetter: "a", answer: "accompany", explanation: "正解：accompany (v.) 陪伴" },
-                    { type: 'text', question: "【單字拼寫 L5】m l o s s o b (花朵、開花)", firstLetter: "b", answer: "blossom", explanation: "正解：blossom (n./v.) 花朵、開花" },
-                    { type: 'text', question: "【單字拼寫 L6】p e l o s (斜坡、坡地)", firstLetter: "s", answer: "slope", explanation: "正解：slope (n.) 斜坡" }
+                    {t:'text', q:"s o y u o j (令人愉快的)", f:"j", a:"joyous", e:"joyous"},{t:'text', q:"c o m p a n y a c (陪伴)", f:"a", a:"accompany", e:"accompany"},
+                    {t:'text', q:"s e n i t l a e s (基本的、不可或缺的)", f:"e", a:"essential", e:"essential"},{t:'text', q:"t p c e c n o (概念)", f:"c", a:"concept", e:"concept"},
+                    {t:'text', q:"u n r o m (哀悼)", f:"m", a:"mourn", e:"mourn"},{t:'text', q:"w o s r r o (悲傷)", f:"s", a:"sorrow", e:"sorrow"},
+                    {t:'text', q:"n c i s o o a c (場合)", f:"o", a:"occasion", e:"occasion"},{t:'text', q:"i n u n r o e (重逢、團聚)", f:"r", a:"reunion", e:"reunion"},
+                    {t:'text', q:"i t n p a e t i c a (期盼)", f:"a", a:"anticipate", e:"anticipate"},{t:'text', q:"v a i r r l a (到達、到來)", f:"a", a:"arrival", e:"arrival"},
+                    {t:'text', q:"e d c o r a t e (裝飾)", f:"d", a:"decorate", e:"decorate"},{t:'text', q:"r e f e r e p c e n (偏愛)", f:"p", a:"preference", e:"preference"},
+                    {t:'text', q:"p o i n t e e c r (歡迎、接待)", f:"r", a:"reception", e:"reception"},{t:'text', q:"s a t e f (盡情享用)", f:"f", a:"feast", e:"feast"},
+                    {t:'text', q:"n w a d (黎明、破曉)", f:"d", a:"dawn", e:"dawn"},{t:'text', q:"m o r a f s n t r (使改變形態)", f:"t", a:"transform", e:"transform"},
+                    {t:'text', q:"b e l e m s e r (看起來像)", f:"r", a:"resemble", e:"resemble"},{t:'text', q:"a i p r i c p t a e (參加)", f:"p", a:"participate", e:"participate"},
+                    {t:'text', q:"o m k c (嘲弄)", f:"m", a:"mock", e:"mock"},{t:'text', q:"g n i c r e z e o (意識到、體認到)", f:"r", a:"recognize", e:"recognize"},
+                    {t:'text', q:"e v i b a l i t e n (不可避免的)", f:"i", a:"inevitable", e:"inevitable"},{t:'text', q:"c e l y c (循環)", f:"c", a:"cycle", e:"cycle"},
+                    {t:'text', q:"u n a l n a (每年的)", f:"a", a:"annual", e:"annual"},{t:'text', q:"w a t i a (等待)", f:"a", a:"await", e:"await"},
+                    {t:'text', q:"s e c e p a (避免、逃跑)", f:"e", a:"escape", e:"escape"}
                 ]
             },
-            'Exam_Comprehensive': {
-                title: "L4-L6 段考綜合題庫",
+            'L5_Vocab': {
+                title: "L5 單字特訓",
                 questions: [
-                    { question: "【L4 字彙】We ________ the living room with colorful balloons and flowers to celebrate Grandma's birthday.", options: ["(A) defended", "(B) decorated", "(C) demanded", "(D) destroyed"], answer: 1, explanation: "decorate (裝飾)。" },
-                    { question: "【L4 文法】Despite denying it, Jim is believed ________ a visit to the casino before going home to his family.", options: ["(A) to have paid", "(B) to pay", "(C) paying", "(D) paid"], answer: 0, explanation: "去賭場發生在過去，早於現在被相信，用 to have p.p.。" },
-                    { question: "【L5 字彙】At night, the city ________ looked beautiful, with shining lights and colorful billboards everywhere.", options: ["(A) landmark", "(B) landlord", "(C) landscape", "(D) landslide"], answer: 2, explanation: "landscape (風景、景色)。" },
-                    { question: "【L6 字彙】The scientist ________ a future where AI technology makes life much easier for everyone.", options: ["(A) encounters", "(B) envisions", "(C) evaluates", "(D) extinguishes"], answer: 1, explanation: "envision (想像、展望)。" },
-                    { question: "【L6 文法】It wasn't ________ Jack was seriously ill that he realized the importance of health.", options: ["(A) if", "(B) until", "(C) since", "(D) although"], answer: 1, explanation: "強調句型 It wasn't until... that..." }
+                    {t:'text', q:"m l o s s o b (花朵、開花)", f:"b", a:"blossom", e:"blossom"},{t:'text', q:"t e l r u s (沙沙作響)", f:"r", a:"rustle", e:"rustle"},
+                    {t:'text', q:"d a s c a p l e n (景色、風景)", f:"l", a:"landscape", e:"landscape"},{t:'text', q:"r o d n p e l s (壯麗、雄偉)", f:"s", a:"splendor", e:"splendor"},
+                    {t:'text', q:"s i l y p e v u r o (先前地)", f:"p", a:"previously", e:"previously"},{t:'text', q:"p i l a t c a (首都、資金)", f:"c", a:"capital", e:"capital"},
+                    {t:'text', q:"t o b s a (以……為傲、擁有)", f:"b", a:"boast", e:"boast"},{t:'text', q:"c o t i r i h s (歷史悠久的)", f:"h", a:"historic", e:"historic"},
+                    {t:'text', q:"c e n e n a t r (大門、入口)", f:"e", a:"entrance", e:"entrance"},{t:'text', q:"t e c i f m i g a n n (壯麗的、雄偉的)", f:"m", a:"magnificent", e:"magnificent"},
+                    {t:'text', q:"k i n g a e r t b a t h (驚人的、極美的)", f:"b", a:"breathtaking", e:"breathtaking"},{t:'text', q:"l e r u s e i y l (悠閒的)", f:"l", a:"leisurely", e:"leisurely"},
+                    {t:'text', q:"g i n s t n u n (撼動人心的)", f:"s", a:"stunning", e:"stunning"},{t:'text', q:"t e d i l a c e (精美的)", f:"d", a:"delicate", e:"delicate"},
+                    {t:'text', q:"v e i t c i n s d i t (獨特的)", f:"d", a:"distinctive", e:"distinctive"},{t:'text', q:"g e l a t n e (雅致的、優雅的)", f:"e", a:"elegant", e:"elegant"},
+                    {t:'text', q:"n a p r e a c p a e (外表)", f:"a", a:"appearance", e:"appearance"},{t:'text', q:"e r u r e t i a t l (文學)", f:"l", a:"literature", e:"literature"},
+                    {t:'text', q:"r e t a b i e d l e (小心的、故意的)", f:"d", a:"deliberate", e:"deliberate"},{t:'text', q:"o n t a t i n s i d e (目的地)", f:"d", a:"destination", e:"destination"}
                 ]
             },
-            'Cloze_Test': {
-                title: "課本文意選填特訓",
+            'L6_Vocab': {
+                title: "L6 單字特訓",
                 questions: [
-                    { passage: "【L4 課文對照段落】\nHave you ever thought about what it would be like to have a deceased loved one return and (1)______ you to a holiday celebration? For many, this is the (2)______ behind the Mexican festival called the Day of the Dead.", question: "(1) 請問第一格該填？", options: ["(A) occasion", "(B) concept", "(C) accompany", "(D) mourn"], answer: 2, explanation: "accompany (v. 陪伴)。" },
-                    { passage: "【L4 課文對照段落】\nHave you ever thought about what it would be like to have a deceased loved one return and (1)______ you to a holiday celebration? For many, this is the (2)______ behind the Mexican festival called the Day of the Dead.", question: "(2) 請問第二格該填？", options: ["(A) sorrow", "(B) concept", "(C) joyous", "(D) reunion"], answer: 1, explanation: "concept (n. 概念)。" },
-                    { passage: "【L5 課文對照段落】\nIn spring, romance is in the air as the city is filled with a sea of pink cherry (1)______. Kyoto has so much more to feast one's eyes on. Having (2)______ been the capital of Japan...", question: "(1) 請問第一格該填？", options: ["(A) capital", "(B) blossoms", "(C) rustling", "(D) splendor"], answer: 1, explanation: "cherry blossoms (櫻花)。" },
-                    { passage: "【L5 課文對照段落】\nIn spring, romance is in the air as the city is filled with a sea of pink cherry (1)______. Kyoto has so much more to feast one's eyes on. Having (2)______ been the capital of Japan...", question: "(2) 請問第二格該填？", options: ["(A) previously", "(B) distinctive", "(C) leisurely", "(D) delicate"], answer: 0, explanation: "previously (adv. 先前地)。" },
-                    { passage: "【L6 課文對照段落】\nHe slid down a snowy (1)______ and fell over a cliff edge. No one else admired Medina's beauty, as she had well-defined features that lacked the (2)______ the villagers valued.", question: "(1) 請問第一格該填？", options: ["(A) paths", "(B) bruised", "(C) slope", "(D) crops"], answer: 2, explanation: "slope (n. 斜坡)。" },
-                    { passage: "【L6 課文對照段落】\nHe slid down a snowy (1)______ and fell over a cliff edge. No one else admired Medina's beauty, as she had well-defined features that lacked the (2)______ the villagers valued.", question: "(2) 請問第二格該填？", options: ["(A) peculiar", "(B) smoothness", "(C) opposition", "(D) dilemma"], answer: 1, explanation: "smoothness (n. 平滑)。" }
+                    {t:'text', q:"p e l o s (斜坡、坡地)", f:"s", a:"slope", e:"slope"},{t:'text', q:"b e t u l m (滾落)", f:"t", a:"tumble", e:"tumble"},
+                    {t:'text', q:"i u d b r e s (瘀傷的)", f:"b", a:"bruised", e:"bruised"},{t:'text', q:"r u p i r o e s (優於、上司)", f:"s", a:"superior", e:"superior"},
+                    {t:'text', q:"m i t n y l t i a e (密切地、了如指掌地)", f:"i", a:"intimately", e:"intimately"},{t:'text', q:"l y i f s k l u l (熟練地)", f:"s", a:"skillfully", e:"skillfully"},
+                    {t:'text', q:"p o c r (作物、莊稼)", f:"c", a:"crop", e:"crop"},{t:'text', q:"h p a t (小路、小徑)", f:"p", a:"path", e:"path"},
+                    {t:'text', q:"a t v i n e g a (導航、摸索行走)", f:"n", a:"navigate", e:"navigate"},{t:'text', q:"d u e r i t s o (外人、外來者)", f:"o", a:"outsider", e:"outsider"},
+                    {t:'text', q:"p t d a a (適應)", f:"a", a:"adapt", e:"adapt"},{t:'text', q:"n i c g l (緊握、堅持)", f:"c", a:"cling", e:"cling"},
+                    {t:'text', q:"w i t k l e n (閃耀)", f:"t", a:"twinkle", e:"twinkle"},{t:'text', q:"y i t p (憐憫、同情)", f:"p", a:"pity", e:"pity"},
+                    {t:'text', q:"w e a (敬畏)", f:"a", a:"awe", e:"awe"},{t:'text', q:"s m o o s n t e s h (平滑、細緻)", f:"s", a:"smoothness", e:"smoothness"},
+                    {t:'text', q:"p i s i t o n o p o (反對、反抗)", f:"o", a:"opposition", e:"opposition"},{t:'text', q:"c u p e r l i a (奇怪的、不尋常的)", f:"p", a:"peculiar", e:"peculiar"},
+                    {t:'text', q:"f r o n c t n o (面臨、面對)", f:"c", a:"confront", e:"confront"},{t:'text', q:"m a m e l i d (困境)", f:"d", a:"dilemma", e:"dilemma"},
+                    {t:'text', q:"l e s s n e r e e h t v e (儘管如此、然而)", f:"n", a:"nevertheless", e:"nevertheless"},{t:'text', q:"z e g a (凝視、注視)", f:"g", a:"gaze", e:"gaze"},
+                    {t:'text', q:"v i s o n i e n (想像、嚮往)", f:"e", a:"envision", e:"envision"},{t:'text', q:"e e f l (逃離、逃跑)", f:"f", a:"flee", e:"flee"}
+                ]
+            },
+            'L4_Exam': {
+                title: "L4 綜合測驗",
+                questions: [
+                    {q:"1. We _______ the living room with colorful balloons and flowers.", o:["(A) defended", "(B) decorated", "(C) demanded", "(D) destroyed"], a:1, e:"decorate (裝飾)"},
+                    {q:"2. Patrick _______ in the cycling competition and won a silver medal.", o:["(A) protested", "(B) practiced", "(C) participated", "(D) presented"], a:2, e:"participate (參加)"},
+                    {q:"3. It was very unkind of David to _______ the girl when she fell.", o:["(A) march", "(B) match", "(C) mock", "(D) melt"], a:2, e:"mock (嘲弄)"},
+                    {q:"4. I was late for work today because of the late _______ of my train.", o:["(A) arrival", "(B) absence", "(C) accident", "(D) approach"], a:0, e:"arrival (抵達)"},
+                    {q:"5. Though Fiona plays all kinds of sports, she has a _______ for swimming.", o:["(A) prevention", "(B) performance", "(C) preparation", "(D) preference"], a:3, e:"preference (偏好)"},
+                    {q:"6. The factory will be closed next month, so it's _______ that many workers will soon be out of work.", o:["(A) incredible", "(B) invisible", "(C) inevitable", "(D) invaluable"], a:2, e:"inevitable (不可避免的)"},
+                    {q:"7. The bookstore around the corner has been _______ into a mobile phone shop.", o:["(A) translated", "(B) transported", "(C) transformed", "(D) transferred"], a:2, e:"transform (轉變)"},
+                    {q:"8. Derek saw many old friends again at his high school ____ after years of separation.", o:["(A) reunion", "(B) relationship", "(C) reputation", "(D) resolution"], a:0, e:"reunion (團聚)"},
+                    {q:"9. There is a close _______ between the fake and the real designer handbags.", o:["(A) response", "(B) resemblance", "(C) resistance", "(D) restriction"], a:1, e:"resemblance (相似)"},
+                    {q:"10. The ancient city of Babylon obtained _______ as a World Heritage Site in 2019.", o:["(A) registration", "(B) regulation", "(C) recognition", "(D) recommendation"], a:2, e:"recognition (認可)"},
+                    {q:"11. Despite denying it, Jim is believed _______ a visit to the casino.", o:["(A) to have paid", "(B) to pay", "(C) paying", "(D) paid"], a:0, e:"早於 believed 發生"},
+                    {q:"12. David planned to visit his former university, _______ he first met his wife.", o:["(A) which", "(B) that", "(C) when", "(D) where"], a:3, e:"where (關係副詞表地方)"},
+                    {q:"13. The dentist had her assistant _______ the patient's file.", o:["(A) to fetch", "(B) fetch", "(C) fetches", "(D) fetched"], a:1, e:"have + O + VR (使役動詞)"},
+                    {q:"14. Kevin would rather relax by the beach all day than _______ to fit in many different activities.", o:["(A) trying", "(B) to try", "(C) try", "(D) tried"], a:2, e:"would rather VR than VR"},
+                    {q:"15. Halfway through the book, I discovered _______ was not the text that my teacher had assigned.", o:["(A) which", "(B) what", "(C) that", "(D) the way"], a:2, e:"that 引導名詞子句當受詞"},
+                    {p: EX4_TXT, q: "(16) 請問應填入？", o: ["(A) reunited", "(B) anticipated", "(C) recognized", "(D) awaited"], a: 2, e: "recognize (認出)"},
+                    {p: EX4_TXT, q: "(17) 請問應填入？", o: ["(A) x", "(B) them", "(C) these", "(D) those"], a: 3, e: "those (指那些人)"},
+                    {p: EX4_TXT, q: "(18) 請問應填入？", o: ["(A) Otherwise", "(B) Instead", "(C) Then", "(D) Likewise"], a: 1, e: "Instead (反而)"},
+                    {p: EX4_TXT, q: "(19) 請問應填入？", o: ["(A) to be", "(B) to have been", "(C) being", "(D) that is"], a: 0, e: "to be"},
+                    {p: EX4_TXT, q: "(20) 請問應填入？", o: ["(A) mapping out", "(B) heading to", "(C) falling victim to", "(D) feeding on"], a: 1, e: "heading to (前往)"}
+                ]
+            },
+            'L5_Exam': {
+                title: "L5 綜合測驗",
+                questions: [
+                    {q:"1. The sight of the ghost completely _______ Paul; he couldn't move a muscle.", o:["(A) stunned", "(B) standard", "(C) strained", "(D) strayed"], a:0, e:"stunned (使震驚)"},
+                    {q:"2. The mother left the nursery with soft and _______ steps.", o:["(A) desperate", "(B) delicate", "(C) deliberate", "(D) desperate"], a:2, e:"deliberate (小心的)"},
+                    {q:"3. At night, the city _______ looked beautiful.", o:["(A) landmark", "(B) landlord", "(C) landscape", "(D) landslide"], a:2, e:"landscape (風景)"},
+                    {q:"4. London, the _______ of the UK, is the political center.", o:["(A) captain", "(B) campus", "(C) capsule", "(D) capital"], a:3, e:"capital (首都)"},
+                    {q:"5. A porter stood at the main _______ of the hotel.", o:["(A) entrance", "(B) envelope", "(C) enterprise", "(D) entertainment"], a:0, e:"entrance (入口)"},
+                    {q:"6. There is no need to hurry. We've got plenty of time for a _______ lunch.", o:["(A) lengthy", "(B) leisurely", "(C) liability", "(D) literal"], a:1, e:"leisurely (悠閒的)"},
+                    {q:"7. It took the train two hours longer to reach its _______.", o:["(A) description", "(B) destination", "(C) destruction", "(D) determination"], a:1, e:"destination (目的地)"},
+                    {q:"8. The writer has become a household name because of her _______ achievements.", o:["(A) literal", "(B) literary", "(C) liberal", "(D) liberated"], a:1, e:"literary (文學的)"},
+                    {q:"9. Fried spiders are popular _______ for locals in Cambodia.", o:["(A) dedications", "(B) definitions", "(C) delicacies", "(D) deficiencies"], a:2, e:"delicacies (佳餚)"},
+                    {q:"10. The movie Joker seems to say that sometimes the _______ between good and evil is hard to find.", o:["(A) distension", "(B) distinction", "(C) distribution", "(D) district"], a:1, e:"distinction (區別)"},
+                    {q:"11. Jane was seen _______ around at the crime scene.", o:["(A) wander", "(B) wandered", "(C) wanders", "(D) wandering"], a:3, e:"was seen V-ing"},
+                    {q:"12. Getting a driver's license will involve _______ both a written test and a road test.", o:["(A) take", "(B) taking", "(C) taken", "(D) to take"], a:1, e:"involve + V-ing"},
+                    {q:"13. Mrs. Kennedy _______ leaves home _______ checking that the doors are locked.", o:["(A) doesn't; with", "(B) doesn't; without", "(C) never; with", "(D) never; without"], a:3, e:"never... without"},
+                    {q:"14. Those _______ wish to smoke need to sit outside.", o:["(A) people", "(B) that", "(C) who", "(D) which"], a:2, e:"those who (那些...的人)"},
+                    {q:"15. It was Jill's cousin _______ broke the high jump world record last week.", o:["(A) that", "(B) which", "(C) whose", "(D) what"], a:0, e:"強調句型 It was... that..."},
+                    {p: EX5_TXT, q: "(16) 請問應填入？", o: ["(A) stood out", "(B) dressed up", "(C) died away", "(D) turned down"], a: 0, e: "stood out (脫穎而出)"},
+                    {p: EX5_TXT, q: "(17) 請問應填入？", o: ["(A) sparkling", "(B) performing", "(C) blossoming", "(D) mastering"], a: 2, e: "blossoming (開花)"},
+                    {p: EX5_TXT, q: "(18) 請問應填入？", o: ["(A) take", "(B) to take", "(C) taken", "(D) taking"], a: 3, e: "spend time V-ing"},
+                    {p: EX5_TXT, q: "(19) 請問應填入？", o: ["(A) Nearly", "(B) Truly", "(C) Slightly", "(D) Suddenly"], a: 1, e: "Truly (真實地)"},
+                    {p: EX5_TXT, q: "(20) 請問應填入？", o: ["(A) to visit", "(B) but visit", "(C) for visiting", "(D) without visiting"], a: 3, e: "without visiting"}
+                ]
+            },
+            'L6_Exam': {
+                title: "L6 綜合測驗",
+                questions: [
+                    {q:"1. The scientist _______ a future where AI technology makes life much easier.", o:["(A) encounters", "(B) envisions", "(C) evaluates", "(D) extinguishes"], a:1, e:"envisions (想像)"},
+                    {q:"2. The children watched the magician's impressive tricks with _______.", o:["(A) aim", "(B) ache", "(C) awe", "(D) axe"], a:2, e:"awe (敬畏)"},
+                    {q:"3. Peter's arm was seriously _______ when he hit the table.", o:["(A) briefed", "(B) brushed", "(C) bruised", "(D) burned"], a:2, e:"bruised (瘀傷)"},
+                    {q:"4. The tourists were surprised to find that the old stone _______ led to a temple.", o:["(A) pace", "(B) pad", "(C) pale", "(D) path"], a:3, e:"path (小徑)"},
+                    {q:"5. Kelly couldn't help but feel great _______ for the homeless man.", o:["(A) pity", "(B) piety", "(C) pine", "(D) pose"], a:0, e:"pity (同情)"},
+                    {q:"6. The surface of the lake was so _______ that the reflection was clearly visible.", o:["(A) smart", "(B) smooth", "(C) sour", "(D) steep"], a:1, e:"smooth (平滑)"},
+                    {q:"7. Harvey was in a _______ about whether to tell the truth or keep the secret.", o:["(A) dialogue", "(B) diameter", "(C) dilemma", "(D) diploma"], a:2, e:"dilemma (困境)"},
+                    {q:"8. The students strongly _______ the school's decision.", o:["(A) oppose", "(B) opposed", "(C) opposing", "(D) opposition"], a:1, e:"opposed (反對)"},
+                    {q:"9. Teresa _______ managed the project.", o:["(A) skill", "(B) skillful", "(C) skillfully", "(D) skillfulness"], a:2, e:"skillfully (熟練地)"},
+                    {q:"10. The couple shared a moment of _______ while watching the sunset.", o:["(A) intimate", "(B) intimacy", "(C) intimately", "(D) intimacy's"], a:1, e:"intimacy (親密)"},
+                    {q:"11. It wasn't _______ Jack was seriously ill that he realized the importance of health.", o:["(A) if", "(B) until", "(C) since", "(D) although"], a:1, e:"It wasn't until... that..."},
+                    {q:"12. Amy wants to make friends with the handsome boy _______ the guitar.", o:["(A) playing", "(B) plays", "(C) who play", "(D) played"], a:0, e:"playing (分詞構句)"},
+                    {q:"13. Engineers are working on techniques _______ improving battery efficiency.", o:["(A) with", "(B) to", "(C) as", "(D) for"], a:3, e:"techniques for V-ing"},
+                    {q:"14. The teacher is explaining _______ students should do.", o:["(A) what", "(B) whom", "(C) that", "(D) which"], a:0, e:"what (疑問代名詞當受詞)"},
+                    {q:"15. You should stop _______ so much time on your smartphone.", o:["(A) to spend", "(B) spent", "(C) spending", "(D) spend"], a:2, e:"stop V-ing (停止做某事)"},
+                    {p: EX6_TXT, q: "(16) 請問應填入？", o: ["(A) injured", "(B) to injure", "(C) injuring", "(D) and injures"], a: 2, e: "injuring"},
+                    {p: EX6_TXT, q: "(17) 請問應填入？", o: ["(A) clinging to", "(B) caring for", "(C) laying eyes on", "(D) coming upon"], a: 1, e: "caring for"},
+                    {p: EX6_TXT, q: "(18) 請問應填入？", o: ["(A) at", "(B) of", "(C) in", "(D) on"], a: 0, e: "amazed at"},
+                    {p: EX6_TXT, q: "(19) 請問應填入？", o: ["(A) neither", "(B) either", "(C) both", "(D) not only"], a: 1, e: "either... or..."},
+                    {p: EX6_TXT, q: "(20) 請問應填入？", o: ["(A) navigate", "(B) tumble", "(C) twinkle", "(D) adapt"], a: 3, e: "adapt to (適應)"}
+                ]
+            },
+            'L4_Cloze': {
+                title: "L4 文意選填",
+                questions: [
+                    {p: CL4_1, q: "(1) 請問第一格應填？", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 3, e: "accompany"},
+                    {p: CL4_1, q: "(2) 請問第二格應填？", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 5, e: "essential"},
+                    {p: CL4_1, q: "(3) 請問第三格應填？", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 1, e: "concept"},
+                    {p: CL4_1, q: "(4) 請問第四格應填？", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 6, e: "mourn"},
+                    {p: CL4_1, q: "(5) 請問第五格應填？", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 2, e: "sorrow"},
+                    {p: CL4_1, q: "(6) 請問第六格應填？", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 7, e: "joyous"},
+                    {p: CL4_1, q: "(7) 請問第七格應填？", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 0, e: "occasion"},
+                    {p: CL4_1, q: "(8) 請問第八格應填？", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 4, e: "reunion"},
+                    {p: CL4_2, q: "(1) 請問第一格應填？", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 5, e: "anticipate"},
+                    {p: CL4_2, q: "(2) 請問第二格應填？", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 2, e: "arrival"},
+                    {p: CL4_2, q: "(3) 請問第三格應填？", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 4, e: "preference"},
+                    {p: CL4_2, q: "(4) 請問第四格應填？", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 1, e: "reception"},
+                    {p: CL4_2, q: "(5) 請問第五格應填？", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 7, e: "decorate"},
+                    {p: CL4_2, q: "(6) 請問第六格應填？", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 6, e: "feast"},
+                    {p: CL4_2, q: "(7) 請問第七格應填？", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 0, e: "dawn"},
+                    {p: CL4_2, q: "(8) 請問第八格應填？", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 3, e: "transforming"},
+                    {p: CL4_3, q: "(1) 請問第一格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 8, e: "resemble"},
+                    {p: CL4_3, q: "(2) 請問第二格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 7, e: "participate"},
+                    {p: CL4_3, q: "(3) 請問第三格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 4, e: "mocking"},
+                    {p: CL4_3, q: "(4) 請問第四格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 1, e: "recognizing"},
+                    {p: CL4_3, q: "(5) 請問第五格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 5, e: "inevitable"},
+                    {p: CL4_3, q: "(6) 請問第六格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 3, e: "cycle"},
+                    {p: CL4_3, q: "(7) 請問第七格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 2, e: "annual"},
+                    {p: CL4_3, q: "(8) 請問第八格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 6, e: "awaits"},
+                    {p: CL4_3, q: "(9) 請問第九格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 0, e: "escape"},
+                    {p: CL4_4, q: "(21) 請問第 21 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 7, e: "sorrowful (悲傷的)"},
+                    {p: CL4_4, q: "(22) 請問第 22 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 3, e: "joyous (快樂的)"},
+                    {p: CL4_4, q: "(23) 請問第 23 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 4, e: "in honor of (向...致敬)"},
+                    {p: CL4_4, q: "(24) 請問第 24 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 8, e: "occasion (場合)"},
+                    {p: CL4_4, q: "(25) 請問第 25 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 6, e: "reception for (為...舉辦的接待)"},
+                    {p: CL4_4, q: "(26) 請問第 26 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 0, e: "throughout Japan (全日本)"},
+                    {p: CL4_4, q: "(27) 請問第 27 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 2, e: "resemble (像)"},
+                    {p: CL4_4, q: "(28) 請問第 28 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 9, e: "essential (基本的)"},
+                    {p: CL4_4, q: "(29) 請問第 29 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 1, e: "dress up in"},
+                    {p: CL4_4, q: "(30) 請問第 30 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 5, e: "accompany (陪伴)"}
+                ]
+            },
+            'L5_Cloze': {
+                title: "L5 文意選填",
+                questions: [
+                    {p: "【單字庫】(A) capital (B) rustling (C) boasts (D) blossoms (E) previously (F) landscape (G) historic (H) splendor\nIn spring, romance is in the air as the city is filled with a sea of pink cherry (1) ________. In summer, green leaves can be heard (2) ________ in the wind and seen sparkling in the sunshine. Maple leaves in autumn set the (3) ________ on fire with orange and red colors. ... Apart from its natural (4) ________, Kyoto has so much more to feast one's eyes on. Having (5) ________ been the (6) ________ of Japan for over a thousand years, the city (7) ________ a large number of (8) ________ shrines and temples.", q: "(1) 第一格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 3, e: "blossoms"},
+                    {p: "同上", q: "(2) 第二格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 1, e: "rustling"},
+                    {p: "同上", q: "(3) 第三格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 5, e: "landscape"},
+                    {p: "同上", q: "(4) 第四格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 7, e: "splendor"},
+                    {p: "同上", q: "(5) 第五格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 4, e: "previously"},
+                    {p: "同上", q: "(6) 第六格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 0, e: "capital"},
+                    {p: "同上", q: "(7) 第七格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 2, e: "boasts"},
+                    {p: "同上", q: "(8) 第八格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 6, e: "historic"},
+                    
+                    {p: "【單字庫】(A) breathtaking (B) stunning (C) magnificent (D) leisurely (E) entrance\nWith giant, leafy maple trees leading up to its main (1) ________, what comes into view is this (2) ________ three-story pavilion. Rising up behind a crystal-clear pond... The reflection of the pavilion on the glassy surface of the pond is a (3) ________ sight. Visitors can take a (4) ________ walk through the surrounding gardens and enjoy many (5) ________ views of this beautiful structure.", q: "(1) 第一格", o: ["(A)","(B)","(C)","(D)","(E)"], a: 4, e: "entrance"},
+                    {p: "同上", q: "(2) 第二格", o: ["(A)","(B)","(C)","(D)","(E)"], a: 2, e: "magnificent"},
+                    {p: "同上", q: "(3) 第三格", o: ["(A)","(B)","(C)","(D)","(E)"], a: 1, e: "stunning"},
+                    {p: "同上", q: "(4) 第四格", o: ["(A)","(B)","(C)","(D)","(E)"], a: 3, e: "leisurely"},
+                    {p: "同上", q: "(5) 第五格", o: ["(A)","(B)","(C)","(D)","(E)"], a: 0, e: "breathtaking"},
+                    
+                    {p: "【單字庫】(A) appearance (B) deliberate (C) distinctive (D) destination (E) elegant (F) delicate (G) literature\nAnother unforgettable Kyoto sight involves coming face to face with one of the old capital's very special \"persons of art,\" or geishas. These are women dressed in (1) ________ kimonos with silk sleeves. Their (2) ________ white makeup, bright red lipstick, and (3) ________ hairpins also make them easy to recognize. And it's not just their unique (4) ________ that makes geishas stand out from the crowd. These highly skilled entertainers spend years mastering different musical instruments, songs, and (5) ________. Of course, no \"person of art\" could be a true geisha without being able to perform the traditional kyomai dance. This ancient art combines slow music with very (6) ________ movements and often expresses very deep emotion. ... Regardless of the season, the city is a must-see (7) ________ for tourists seeking an authentic local experience.", q: "(1) 第一格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 4, e: "elegant"},
+                    {p: "同上", q: "(2) 第二格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 2, e: "distinctive"},
+                    {p: "同上", q: "(3) 第三格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 5, e: "delicate"},
+                    {p: "同上", q: "(4) 第四格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 0, e: "appearance"},
+                    {p: "同上", q: "(5) 第五格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 6, e: "literature"},
+                    {p: "同上", q: "(6) 第六格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 1, e: "deliberate"},
+                    {p: "同上", q: "(7) 第七格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 3, e: "destination"}
+                ]
+            },
+            'L6_Cloze': {
+                title: "L6 文意選填",
+                questions: [
+                    {p: "【單字庫】(A) paths (B) bruised (C) navigate (D) intimately (E) tumbling (F) crops (G) superior (H) skillfully (I) slope\nNuñez slid down a snowy (1) ________ and fell over a cliff edge, (2) ________ a great distance. (3) ________ and dazed... Feeling (4) ________ to these sightless people... They knew their mountain kingdom (5) ________. The villagers (6) ________ farmed... effective techniques for growing (7) ________. The (8) ________ helped them (9) ________ safely.", q: "(1) 第一格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 8, e: "slope"},
+                    {p: "同上", q: "(2) 第二格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 4, e: "tumbling"},
+                    {p: "同上", q: "(3) 第三格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 1, e: "bruised"},
+                    {p: "同上", q: "(4) 第四格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 6, e: "superior"},
+                    {p: "同上", q: "(5) 第五格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 3, e: "intimately"},
+                    {p: "同上", q: "(6) 第六格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 7, e: "skillfully"},
+                    {p: "同上", q: "(7) 第七格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 5, e: "crops"},
+                    {p: "同上", q: "(8) 第八格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 0, e: "paths"},
+                    {p: "同上", q: "(9) 第九格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 2, e: "navigate"},
+                    
+                    {p: "【單字庫】(A) pitied (B) adapted (C) smoothness (D) awe (E) outsider (F) twinkling (G) clung\nYacob put the (1) ________ to work. Nuñez (2) ________ to their way of life, but he (3) ________ to the reality of sight. The more he spoke of (4) ________ stars, the more they (5) ________ him. Lack of (6) ________. She lacked the (7) ________ the villagers valued.", q: "(1) 第一格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 4, e: "outsider"},
+                    {p: "同上", q: "(2) 第二格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 1, e: "adapted"},
+                    {p: "同上", q: "(3) 第三格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 6, e: "clung"},
+                    {p: "同上", q: "(4) 第四格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 5, e: "twinkling"},
+                    {p: "同上", q: "(5) 第五格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 0, e: "pitied"},
+                    {p: "同上", q: "(6) 第六格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 3, e: "awe"},
+                    {p: "同上", q: "(7) 第七格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 2, e: "smoothness"},
+                    
+                    {p: "【單字庫】(A) peculiar (B) gazing (C) confronted (D) fled (E) opposition (F) envisioning (G) Nevertheless (H) dilemma\nDesire to marry faced (1) ________. Remove the (2) ________ orbs. Nuñez was (3) ________ with a (4) ________. (5) ________, it wasn't until the day of his surgery... (6) ________ at the landscape and (7) ________ all he might see... he (8) ________ the country.", q: "(1) 第一格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 4, e: "opposition"},
+                    {p: "同上", q: "(2) 第二格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 0, e: "peculiar"},
+                    {p: "同上", q: "(3) 第三格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 2, e: "confronted"},
+                    {p: "同上", q: "(4) 第四格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 7, e: "dilemma"},
+                    {p: "同上", q: "(5) 第五格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 6, e: "Nevertheless"},
+                    {p: "同上", q: "(6) 第六格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 1, e: "gazing"},
+                    {p: "同上", q: "(7) 第七格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 5, e: "envisioning"},
+                    {p: "同上", q: "(8) 第八格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 3, e: "fled"}
                 ]
             }
         };
 
-        let currentAppId = 'english-course-l4l6-app';
         let app, db, auth;
-        let currentUser = null;
-        let currentStudentName = "";
-        
-        let activeModule = null;
-        let currentQuestions = [];
-        let currentQIndex = 0;
-        let currentScore = 0;
-        let isQuizActive = false;
-        let cheatingAttempts = 0;
-        let userAnswersHistory = [];
-        let pendingDraftData = null;
+        let currentUser = null, currentStudentName = "";
+        let activeModule = null, currentQuestions = [], currentQIndex = 0, currentScore = 0;
+        let isQuizActive = false, cheatingAttempts = 0, userAnswersHistory = [], pendingDraftData = null;
+        let teacherLiveUnsub = null, teacherRecordsUnsub = null;
 
-        let teacherLiveUnsub = null;
-        let teacherRecordsUnsub = null;
-
-        // 防弊機制
         function setupAntiCheat() {
-            document.addEventListener('contextmenu', event => {
-                if (isQuizActive) {
-                    event.preventDefault();
-                    showCustomMessage("系統提醒", "測驗進行中嚴禁點擊滑鼠右鍵。");
-                }
-            });
-            document.addEventListener('copy', event => { if (isQuizActive) event.preventDefault(); });
-            document.addEventListener('paste', event => { if (isQuizActive) event.preventDefault(); });
-            document.addEventListener('keydown', event => {
-                if (isQuizActive && (event.ctrlKey || event.metaKey) && ['c', 'v', 'f', 'a', 's'].includes(event.key.toLowerCase())) {
-                    event.preventDefault();
-                }
-            });
+            document.addEventListener('contextmenu', e => { if (isQuizActive) e.preventDefault(); });
+            document.addEventListener('copy', e => { if (isQuizActive) e.preventDefault(); });
+            document.addEventListener('paste', e => { if (isQuizActive) e.preventDefault(); });
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden && isQuizActive) {
                     cheatingAttempts++;
@@ -497,475 +552,202 @@
                 }
             });
         }
+        window.closeWarningModal = () => document.getElementById('modal-warning').classList.add('hidden');
 
-        window.closeWarningModal = function() {
-            document.getElementById('modal-warning').classList.add('hidden');
-        }
-        
-        function showCustomMessage(title, text) {
-            document.getElementById('modal-message-title').innerText = title;
-            document.getElementById('modal-message-text').innerText = text;
-            document.getElementById('modal-message').classList.remove('hidden');
-        }
-        
-        window.closeMessageModal = function() {
-            document.getElementById('modal-message').classList.add('hidden');
-        }
-
-        function switchView(viewId) {
-            ['view-login', 'view-dashboard', 'view-quiz', 'view-records', 'view-teacher-dashboard'].forEach(v => {
-                document.getElementById(v).classList.add('hidden');
-            });
-            document.getElementById(viewId).classList.remove('hidden');
+        function switchView(id) {
+            ['view-login', 'view-dashboard', 'view-quiz', 'view-records', 'view-teacher-dashboard'].forEach(v => document.getElementById(v).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
             window.scrollTo(0,0);
         }
 
         async function initApp() {
             setupAntiCheat();
-            try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-            } catch(e) {
-                console.error("Firebase Init Error:", e);
-            }
+            try { app = initializeApp(firebaseConfig); db = getFirestore(app); auth = getAuth(app); } catch(e) {}
             document.getElementById('btn-login').addEventListener('click', handleLogin);
         }
 
         async function handleLogin() {
-            const nameInput = document.getElementById('student-name').value.trim();
-            if (!nameInput) {
-                showCustomMessage("請輸入姓名", "系統需要您的姓名來建置專屬的學習紀錄。");
-                return;
-            }
-
-            const btn = document.getElementById('btn-login');
-            btn.innerHTML = '連線中...';
-            btn.disabled = true;
-
-            try {
-                if (auth) {
-                    await signInAnonymously(auth);
-                    currentUser = auth.currentUser;
-                }
-            } catch (error) {
-                console.warn("Auth fallback (local mode):", error);
-                currentUser = { uid: 'local_user_' + Date.now() };
-            } finally {
-                currentStudentName = nameInput;
-                document.getElementById('display-student-name').innerText = currentStudentName;
-                document.getElementById('nav-user-info').classList.remove('hidden');
-                
-                // 學生登入後，隱藏老師後台按鈕
-                document.getElementById('btn-teacher-nav').classList.add('hidden');
-                
-                switchView('view-dashboard');
-                btn.innerHTML = '進入測驗系統';
-                btn.disabled = false;
-            }
+            const name = document.getElementById('student-name').value.trim();
+            if (!name) return alert("請輸入您的姓名！");
+            document.getElementById('btn-login').innerText = '連線中...';
+            try { if (auth) { await signInAnonymously(auth); currentUser = auth.currentUser; } } catch(e) { currentUser = { uid: 'local_' + Date.now() }; }
+            currentStudentName = name;
+            document.getElementById('display-student-name').innerText = name;
+            document.getElementById('nav-user-info').classList.remove('hidden');
+            document.getElementById('btn-teacher-nav').classList.add('hidden');
+            switchView('view-dashboard');
+            document.getElementById('btn-login').innerText = '進入測驗系統';
         }
 
         window.checkDraftAndStart = async function(moduleId) {
-            activeModule = moduleId;
-            currentQuestions = quizData[moduleId].questions;
-
-            if (currentUser && db && !currentUser.uid.startsWith('local_user_')) {
+            activeModule = moduleId; currentQuestions = quizData[moduleId].questions;
+            if (currentUser && db && !currentUser.uid.startsWith('local_')) {
                 try {
-                    const draftRef = doc(db, 'artifacts', currentAppId, 'users', currentUser.uid, 'progress', moduleId);
-                    const draftSnap = await getDoc(draftRef);
-                    if (draftSnap.exists()) {
-                        const data = draftSnap.data();
-                        if (data.currentQIndex > 0 && data.currentQIndex < currentQuestions.length) {
-                            pendingDraftData = data;
-                            document.getElementById('resume-description').innerText = `檢測到您在「${quizData[moduleId].title}」中有未完成的測驗紀錄（已完成第 ${data.currentQIndex} / ${currentQuestions.length} 題）。`;
-                            document.getElementById('modal-resume').classList.remove('hidden');
-                            return;
-                        }
+                    const snap = await getDoc(doc(db, 'artifacts', 'english-course-l4l6', 'users', currentUser.uid, 'progress', moduleId));
+                    if (snap.exists() && snap.data().currentQIndex > 0) {
+                        pendingDraftData = snap.data();
+                        document.getElementById('resume-description').innerText = `偵測到「${quizData[moduleId].title}」有未完成紀錄。`;
+                        document.getElementById('modal-resume').classList.remove('hidden');
+                        return;
                     }
-                } catch (e) {
-                    console.error("Check draft error:", e);
-                }
+                } catch(e) {}
             }
-            startNewQuiz(moduleId);
+            startNewQuiz();
         }
-
         window.confirmResumeQuiz = function() {
             document.getElementById('modal-resume').classList.add('hidden');
             if (!pendingDraftData) return;
-            
-            currentQIndex = pendingDraftData.currentQIndex;
-            currentScore = pendingDraftData.currentScore || 0;
-            cheatingAttempts = pendingDraftData.cheatingAttempts || 0;
-            userAnswersHistory = pendingDraftData.answers || [];
-            isQuizActive = true;
+            currentQIndex = pendingDraftData.currentQIndex; currentScore = pendingDraftData.currentScore || 0;
+            cheatingAttempts = pendingDraftData.cheatingAttempts || 0; userAnswersHistory = pendingDraftData.answers || [];
+            isQuizActive = true; document.getElementById('quiz-title').innerText = quizData[activeModule].title;
+            renderQuestion(); switchView('view-quiz');
+        }
+        window.confirmRestartQuiz = function() { document.getElementById('modal-resume').classList.add('hidden'); startNewQuiz(); }
 
+        function startNewQuiz() {
+            currentQIndex = 0; currentScore = 0; cheatingAttempts = 0; userAnswersHistory = []; isQuizActive = true;
             document.getElementById('quiz-title').innerText = quizData[activeModule].title;
-            renderQuestion();
-            switchView('view-quiz');
-        }
-
-        window.confirmRestartQuiz = async function() {
-            document.getElementById('modal-resume').classList.add('hidden');
-            if (currentUser && db && activeModule && !currentUser.uid.startsWith('local_user_')) {
-                try {
-                    const draftRef = doc(db, 'artifacts', currentAppId, 'users', currentUser.uid, 'progress', activeModule);
-                    await deleteDoc(draftRef);
-                    
-                    const publicProgressRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'student_progress', `${currentUser.uid}_${activeModule}`);
-                    await deleteDoc(publicProgressRef);
-                } catch (e) {
-                    console.error("Delete draft error:", e);
-                }
-            }
-            startNewQuiz(activeModule);
-        }
-
-        function startNewQuiz(moduleId) {
-            activeModule = moduleId;
-            currentQuestions = quizData[moduleId].questions;
-            currentQIndex = 0;
-            currentScore = 0;
-            cheatingAttempts = 0;
-            userAnswersHistory = [];
-            isQuizActive = true;
-            
-            document.getElementById('quiz-title').innerText = quizData[moduleId].title;
-            renderQuestion();
-            switchView('view-quiz');
+            renderQuestion(); switchView('view-quiz');
         }
 
         async function autoSaveProgress() {
-            if (!currentUser || !db || !isQuizActive || currentUser.uid.startsWith('local_user_')) return;
-            const now = new Date();
-            const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
-
+            if (!currentUser || !db || !isQuizActive || currentUser.uid.startsWith('local_')) return;
             const payload = {
-                studentName: currentStudentName,
-                userId: currentUser.uid,
-                moduleId: activeModule,
-                moduleTitle: quizData[activeModule].title,
-                currentQIndex: currentQIndex,
-                totalQuestions: currentQuestions.length,
-                currentScore: currentScore,
-                cheatingAttempts: cheatingAttempts,
-                answers: userAnswersHistory,
-                lastUpdated: Date.now(),
-                formattedTime: timeStr
+                studentName: currentStudentName, userId: currentUser.uid, moduleId: activeModule, moduleTitle: quizData[activeModule].title,
+                currentQIndex, totalQuestions: currentQuestions.length, currentScore, cheatingAttempts, answers: userAnswersHistory,
+                lastUpdated: Date.now(), formattedTime: new Date().toLocaleTimeString()
             };
-
             try {
-                const draftRef = doc(db, 'artifacts', currentAppId, 'users', currentUser.uid, 'progress', activeModule);
-                await setDoc(draftRef, payload);
-
-                const publicLiveRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'student_progress', `${currentUser.uid}_${activeModule}`);
-                await setDoc(publicLiveRef, payload);
-            } catch (e) {
-                console.error("Auto-save error:", e);
-            }
+                await setDoc(doc(db, 'artifacts', 'english-course-l4l6', 'users', currentUser.uid, 'progress', activeModule), payload);
+                await setDoc(doc(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_progress', `${currentUser.uid}_${activeModule}`), payload);
+            } catch(e) {}
         }
 
         function renderQuestion() {
             const q = currentQuestions[currentQIndex];
             document.getElementById('quiz-progress').innerText = `${currentQIndex + 1} / ${currentQuestions.length}`;
-            document.getElementById('question-text').innerText = `${currentQIndex + 1}. ${q.question}`;
+            document.getElementById('question-text').innerText = q.q;
             
-            // 處理段落題組顯示
             const passageBox = document.getElementById('passage-container');
-            if (q.passage) {
-                passageBox.classList.remove('hidden');
-                document.getElementById('passage-text').innerText = q.passage;
-            } else {
-                passageBox.classList.add('hidden');
-            }
+            if (q.p) { passageBox.classList.remove('hidden'); document.getElementById('passage-text').innerText = q.p; } else { passageBox.classList.add('hidden'); }
             
-            const optionsContainer = document.getElementById('options-container');
-            const textContainer = document.getElementById('text-input-container');
-            const feedbackBox = document.getElementById('quiz-feedback');
-            
-            feedbackBox.classList.add('hidden');
+            document.getElementById('quiz-feedback').classList.add('hidden');
             document.getElementById('btn-next-question').classList.add('hidden');
             document.getElementById('btn-finish-quiz').classList.add('hidden');
 
-            if (q.type === 'text') {
-                optionsContainer.classList.add('hidden');
-                textContainer.classList.remove('hidden');
-                document.getElementById('spelling-prefix').innerText = q.firstLetter;
-                
-                const inputField = document.getElementById('spelling-input');
-                inputField.value = '';
-                inputField.disabled = false;
-                inputField.focus();
+            const optionsBox = document.getElementById('options-container');
+            const textBox = document.getElementById('text-input-container');
 
-                inputField.onkeyup = (e) => {
-                    if (e.key === 'Enter') submitTextAnswer();
-                };
+            if (q.t === 'text') {
+                optionsBox.classList.add('hidden'); textBox.classList.remove('hidden');
+                document.getElementById('spelling-prefix').innerText = q.f;
+                const input = document.getElementById('spelling-input');
+                input.value = ''; input.disabled = false; input.focus(); document.getElementById('btn-submit-text').disabled = false;
+                input.onkeyup = (e) => { if (e.key === 'Enter') submitTextAnswer(); };
             } else {
-                textContainer.classList.add('hidden');
-                optionsContainer.classList.remove('hidden');
-                optionsContainer.innerHTML = '';
-                
-                q.options.forEach((opt, idx) => {
+                textBox.classList.add('hidden'); optionsBox.classList.remove('hidden'); optionsBox.innerHTML = '';
+                q.o.forEach((opt, idx) => {
                     const btn = document.createElement('button');
-                    btn.className = "w-full text-left px-5 py-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition bg-white text-gray-800 font-medium option-btn";
-                    btn.innerText = opt;
-                    btn.onclick = () => selectMCOption(idx, btn);
-                    optionsContainer.appendChild(btn);
+                    btn.className = "w-full text-left px-5 py-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 bg-white font-medium option-btn";
+                    btn.innerText = opt; btn.onclick = () => selectMCOption(idx, btn, q); optionsBox.appendChild(btn);
                 });
             }
         }
 
-        function selectMCOption(selectedIndex, btnElement) {
-            const q = currentQuestions[currentQIndex];
-            const isCorrect = selectedIndex === q.answer;
-            
-            const allBtns = document.querySelectorAll('.option-btn');
-            allBtns.forEach(btn => {
-                btn.disabled = true;
-                btn.classList.add('cursor-not-allowed');
-            });
-
-            if (isCorrect) {
-                currentScore++;
-                btnElement.classList.replace('border-gray-200', 'border-green-500');
-                btnElement.classList.replace('hover:bg-blue-50', 'bg-green-50');
-            } else {
-                btnElement.classList.replace('border-gray-200', 'border-red-500');
-                allBtns[q.answer].classList.replace('border-gray-200', 'border-green-500');
-                allBtns[q.answer].classList.add('bg-green-50');
-            }
-
-            userAnswersHistory[currentQIndex] = {
-                qIndex: currentQIndex,
-                questionText: q.question,
-                userAnswer: q.options[selectedIndex],
-                correctAnswer: q.options[q.answer],
-                isCorrect: isCorrect,
-                explanation: q.explanation
-            };
-
-            autoSaveProgress();
-            showFeedback(isCorrect, q.explanation);
+        function selectMCOption(idx, btn, q) {
+            const isCorrect = (idx === q.a);
+            document.querySelectorAll('.option-btn').forEach(b => { b.disabled = true; b.classList.add('cursor-not-allowed'); });
+            if (isCorrect) { currentScore++; btn.classList.replace('border-gray-200', 'border-green-500'); btn.classList.add('bg-green-50'); } 
+            else { btn.classList.replace('border-gray-200', 'border-red-500'); }
+            recordAnswer(q, q.o[idx], q.o[q.a], isCorrect);
         }
-
         window.submitTextAnswer = function() {
-            const q = currentQuestions[currentQIndex];
-            const inputField = document.getElementById('spelling-input');
-            const userRawValue = inputField.value.trim().toLowerCase();
-            
-            if (!userRawValue) return;
-
-            inputField.disabled = true;
-            document.getElementById('btn-submit-text').disabled = true;
-
-            const targetWord = q.answer.toLowerCase();
-            const prefix = q.firstLetter.toLowerCase();
-            const isCorrect = (userRawValue === targetWord) || ((prefix + userRawValue) === targetWord);
-
-            if (isCorrect) {
-                currentScore++;
-                inputField.classList.add('bg-green-50', 'border-green-500');
-            } else {
-                inputField.classList.add('bg-red-50', 'border-red-500');
-            }
-
-            userAnswersHistory[currentQIndex] = {
-                qIndex: currentQIndex,
-                questionText: q.question,
-                userAnswer: userRawValue,
-                correctAnswer: q.answer,
-                isCorrect: isCorrect,
-                explanation: q.explanation
-            };
-
-            autoSaveProgress();
-            showFeedback(isCorrect, `${q.explanation} (您的填寫: ${userRawValue})`);
+            const q = currentQuestions[currentQIndex]; const input = document.getElementById('spelling-input'); const val = input.value.trim().toLowerCase();
+            if (!val) return; input.disabled = true; document.getElementById('btn-submit-text').disabled = true;
+            const isCorrect = (val === q.a.toLowerCase() || (q.f.toLowerCase() + val) === q.a.toLowerCase());
+            if (isCorrect) { currentScore++; input.classList.add('border-green-500', 'bg-green-50'); } else { input.classList.add('border-red-500', 'bg-red-50'); }
+            recordAnswer(q, val, q.a, isCorrect);
         }
 
-        function showFeedback(isCorrect, explanationText) {
-            const feedbackBox = document.getElementById('quiz-feedback');
-            feedbackBox.classList.remove('hidden');
-            if (isCorrect) {
-                feedbackBox.className = "mb-6 p-4 rounded-xl bg-green-100 border border-green-200 text-green-800";
-                feedbackBox.innerHTML = `<p class="font-bold mb-1">✅ 答對了！</p><p class="text-sm">${explanationText}</p>`;
-            } else {
-                feedbackBox.className = "mb-6 p-4 rounded-xl bg-red-100 border border-red-200 text-red-800";
-                feedbackBox.innerHTML = `<p class="font-bold mb-1">❌ 答錯了。</p><p class="text-sm">${explanationText}</p>`;
-            }
+        function recordAnswer(q, userAns, correctAns, isCorrect) {
+            userAnswersHistory[currentQIndex] = { questionText: q.q, userAnswer: userAns, correctAnswer: correctAns, isCorrect, explanation: q.e };
+            autoSaveProgress(); showFeedback(isCorrect, q.e);
+        }
 
+        function showFeedback(isCorrect, expl) {
+            const fb = document.getElementById('quiz-feedback'); fb.classList.remove('hidden');
+            fb.className = `mb-6 p-4 rounded-xl border ${isCorrect ? 'bg-green-100 border-green-200 text-green-800' : 'bg-red-100 border-red-200 text-red-800'}`;
+            fb.innerHTML = `<p class="font-bold"> ${isCorrect ? '✅ 答對了！' : '❌ 答錯了。'}</p><p class="text-sm mt-1">${expl}</p>`;
             if (currentQIndex < currentQuestions.length - 1) {
-                const nextBtn = document.getElementById('btn-next-question');
-                nextBtn.classList.remove('hidden');
-                nextBtn.onclick = () => {
-                    document.getElementById('btn-submit-text').disabled = false;
-                    currentQIndex++;
-                    renderQuestion();
-                };
+                const nxt = document.getElementById('btn-next-question'); nxt.classList.remove('hidden'); nxt.onclick = () => { currentQIndex++; renderQuestion(); };
             } else {
-                const finishBtn = document.getElementById('btn-finish-quiz');
-                finishBtn.classList.remove('hidden');
-                finishBtn.onclick = () => finishQuiz();
+                const fin = document.getElementById('btn-finish-quiz'); fin.classList.remove('hidden'); fin.onclick = finishQuiz;
             }
         }
 
         async function finishQuiz() {
-            isQuizActive = false;
-            const finalScore = Math.round((currentScore / currentQuestions.length) * 100);
-            
-            for (let i = 0; i < currentQuestions.length; i++) {
-                if (!userAnswersHistory[i]) {
-                    const q = currentQuestions[i];
-                    userAnswersHistory[i] = {
-                        qIndex: i,
-                        questionText: q.question,
-                        userAnswer: "(未作答/跳過)",
-                        correctAnswer: q.type === 'text' ? q.answer : q.options[q.answer],
-                        isCorrect: false,
-                        explanation: q.explanation
-                    };
-                }
-            }
-
-            const now = new Date();
-            const dateString = `${now.getFullYear()}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getDate().toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
-
-            const finalRecordPayload = {
-                studentName: currentStudentName,
-                userId: currentUser ? currentUser.uid : 'local',
-                moduleName: quizData[activeModule].title,
-                score: finalScore,
-                totalQuestions: currentQuestions.length,
-                correctAnswers: currentScore,
-                cheatingAttempts: cheatingAttempts,
-                answers: userAnswersHistory,
-                timestamp: dateString,
-                serverTime: Date.now()
+            isQuizActive = false; const finalScore = Math.round((currentScore / currentQuestions.length) * 100);
+            const payload = {
+                studentName: currentStudentName, userId: currentUser ? currentUser.uid : 'local', moduleName: quizData[activeModule].title,
+                score: finalScore, cheatingAttempts, answers: userAnswersHistory, timestamp: new Date().toLocaleString(), serverTime: Date.now()
             };
+            let localHist = JSON.parse(localStorage.getItem(`hist_${currentStudentName}`) || '[]');
+            localHist.push(payload); localStorage.setItem(`hist_${currentStudentName}`, JSON.stringify(localHist));
 
-            let localHistory = JSON.parse(localStorage.getItem(`history_${currentStudentName}`) || '[]');
-            localHistory.push(finalRecordPayload);
-            localStorage.setItem(`history_${currentStudentName}`, JSON.stringify(localHistory));
-
-            if (currentUser && db && !currentUser.uid.startsWith('local_user_')) {
+            if (currentUser && db && !currentUser.uid.startsWith('local_')) {
                 try {
-                    const userRecordsRef = collection(db, 'artifacts', currentAppId, 'users', currentUser.uid, 'quiz_records');
-                    await addDoc(userRecordsRef, finalRecordPayload);
-
-                    const publicRecordsRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'student_records');
-                    await addDoc(publicRecordsRef, finalRecordPayload);
-
-                    const draftRef = doc(db, 'artifacts', currentAppId, 'users', currentUser.uid, 'progress', activeModule);
-                    await deleteDoc(draftRef);
-
-                    const publicProgressRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'student_progress', `${currentUser.uid}_${activeModule}`);
-                    await deleteDoc(publicProgressRef);
-
-                    showCustomMessage("測驗完成", `得分：${finalScore} 分！所有對答明細已同步至教師端。`);
-                } catch (error) {
-                    showCustomMessage("測驗完成", `得分：${finalScore} 分！(已存至本機)`);
-                }
-            } else {
-                showCustomMessage("測驗完成", `得分：${finalScore} 分！(已存至本機)`);
-            }
+                    await addDoc(collection(db, 'artifacts', 'english-course-l4l6', 'users', currentUser.uid, 'records'), payload);
+                    await addDoc(collection(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_records'), payload);
+                    await deleteDoc(doc(db, 'artifacts', 'english-course-l4l6', 'users', currentUser.uid, 'progress', activeModule));
+                    await deleteDoc(doc(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_progress', `${currentUser.uid}_${activeModule}`));
+                    alert(`測驗完成！得分：${finalScore} 分 (成績已上傳)`);
+                } catch(e) { alert(`測驗完成！得分：${finalScore} 分`); }
+            } else { alert(`測驗完成！得分：${finalScore} 分`); }
             showDashboard();
         }
 
-        window.showDashboard = function() {
-            isQuizActive = false;
-            switchView('view-dashboard');
-        }
+        window.showDashboard = () => { isQuizActive = false; switchView('view-dashboard'); };
+        window.promptTeacherAuth = () => { document.getElementById('teacher-passcode').value = ''; document.getElementById('modal-teacher-auth').classList.remove('hidden'); };
+        window.closeTeacherAuthModal = () => document.getElementById('modal-teacher-auth').classList.add('hidden');
+        window.verifyTeacherPasscode = () => { if(document.getElementById('teacher-passcode').value === 'teacher123') { closeTeacherAuthModal(); openTeacherDashboard(); } else alert("身分驗證失敗！"); };
+        window.exitTeacherDashboard = () => switchView(currentStudentName ? 'view-dashboard' : 'view-login');
 
-        window.showRecords = async function() {
-            switchView('view-records');
-            const tbody = document.getElementById('records-table-body');
-            const noMsg = document.getElementById('no-records-msg');
-            
-            tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">資料載入中...</td></tr>';
-            noMsg.classList.add('hidden');
-
-            let records = [];
-
-            const localHistory = JSON.parse(localStorage.getItem(`history_${currentStudentName}`) || '[]');
-            records = records.concat(localHistory);
-
-            if (currentUser && db && !currentUser.uid.startsWith('local_user_')) {
-                try {
-                    const recordsRef = collection(db, 'artifacts', currentAppId, 'users', currentUser.uid, 'quiz_records');
-                    const snapshot = await getDocs(recordsRef);
-                    snapshot.forEach(docSnap => {
-                        const rec = docSnap.data();
-                        rec.id = docSnap.id;
-                        if (!records.some(r => r.timestamp === rec.timestamp && r.moduleName === rec.moduleName)) {
-                            records.push(rec);
-                        }
-                    });
-                } catch (error) {
-                    console.warn("Fetch cloud records error:", error);
-                }
-            }
-
-            if (records.length === 0) {
-                tbody.innerHTML = '';
-                noMsg.classList.remove('hidden');
-                return;
-            }
-
-            records.sort((a, b) => (b.serverTime || 0) - (a.serverTime || 0));
-            window.fetchedUserRecords = records;
-            tbody.innerHTML = '';
-
-            records.forEach((record, index) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-50 border-b border-gray-100 transition";
-                
-                let statusHtml = '<span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-bold">全程專注</span>';
-                if (record.cheatingAttempts > 0) {
-                    statusHtml = `<span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-bold">切換視窗 (${record.cheatingAttempts}次)</span>`;
-                }
-
-                tr.innerHTML = `
-                    <td class="p-4 font-medium text-gray-800">${record.moduleName}</td>
-                    <td class="p-4 text-gray-500 text-sm">${record.timestamp}</td>
-                    <td class="p-4 font-bold ${record.score >= 60 ? 'text-blue-600' : 'text-red-600'}">${record.score} 分</td>
-                    <td class="p-4">${statusHtml}</td>
-                    <td class="p-4">
-                        <button onclick="viewRecordDetail(${index}, 'user')" class="text-blue-600 hover:text-blue-800 text-sm font-semibold underline">
-                            檢視對答明細
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
+        function openTeacherDashboard() {
+            switchView('view-teacher-dashboard'); if(!db) return;
+            if(teacherLiveUnsub) teacherLiveUnsub();
+            teacherLiveUnsub = onSnapshot(collection(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_progress'), snap => {
+                const tb = document.getElementById('teacher-live-tbody'); tb.innerHTML = '';
+                if(snap.empty) { tb.innerHTML = '<tr><td colspan="6" class="p-4 text-center">無學生作答中</td></tr>'; return; }
+                snap.forEach(doc => { const d = doc.data(); tb.innerHTML += `<tr class="border-b hover:bg-gray-100"><td class="p-3.5 font-bold">${d.studentName}</td><td class="p-3.5 text-blue-700">${d.moduleTitle}</td><td class="p-3.5">${d.currentQIndex+1}/${d.totalQuestions}</td><td class="p-3.5 text-green-600 font-bold">${d.currentScore}</td><td class="p-3.5 text-red-500 font-bold">${d.cheatingAttempts}次</td><td class="p-3.5 text-xs text-gray-500">${d.formattedTime}</td></tr>`; });
+            });
+            if(teacherRecordsUnsub) teacherRecordsUnsub();
+            teacherRecordsUnsub = onSnapshot(collection(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_records'), snap => {
+                const tb = document.getElementById('teacher-records-tbody'); tb.innerHTML = ''; window.teacherFetchedRecs = [];
+                if(snap.empty) { tb.innerHTML = '<tr><td colspan="6" class="p-4 text-center">無交卷紀錄</td></tr>'; return; }
+                let arr = []; snap.forEach(doc => arr.push(doc.data())); arr.sort((a,b) => b.serverTime - a.serverTime); window.teacherFetchedRecs = arr;
+                arr.forEach((r, idx) => { tb.innerHTML += `<tr class="border-b hover:bg-gray-100"><td class="p-3.5 font-bold">${r.studentName}</td><td class="p-3.5">${r.moduleName}</td><td class="p-3.5 font-bold ${r.score>=60?'text-blue-600':'text-red-600'}">${r.score}分</td><td class="p-3.5 text-red-500 font-bold">${r.cheatingAttempts}次</td><td class="p-3.5 text-xs text-gray-500">${r.timestamp}</td><td class="p-3.5"><button onclick="viewRecordDetail(${idx}, 'teacher')" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded text-xs font-bold transition">查看完整考卷</button></td></tr>`; });
             });
         }
 
-        window.promptTeacherAuth = function() {
-            document.getElementById('teacher-passcode').value = '';
-            document.getElementById('modal-teacher-auth').classList.remove('hidden');
+        window.showRecords = function() {
+            switchView('view-records'); const tb = document.getElementById('records-table-body'); tb.innerHTML = '';
+            let hist = JSON.parse(localStorage.getItem(`hist_${currentStudentName}`) || '[]'); window.userFetchedRecs = hist.sort((a,b) => b.serverTime - a.serverTime);
+            if(hist.length===0) { document.getElementById('no-records-msg').classList.remove('hidden'); return; }
+            document.getElementById('no-records-msg').classList.add('hidden');
+            hist.forEach((r, idx) => { tb.innerHTML += `<tr class="border-b"><td class="p-4 font-medium">${r.moduleName}</td><td class="p-4 text-sm text-gray-500">${r.timestamp}</td><td class="p-4 font-bold ${r.score>=60?'text-blue-600':'text-red-600'}">${r.score}分</td><td class="p-4 text-red-500 font-bold">${r.cheatingAttempts}次警告</td><td class="p-4"><button onclick="viewRecordDetail(${idx}, 'user')" class="text-blue-600 hover:text-blue-800 underline text-sm font-semibold">對答明細</button></td></tr>`; });
         }
 
-        window.closeTeacherAuthModal = function() {
-            document.getElementById('modal-teacher-auth').classList.add('hidden');
+        window.viewRecordDetail = function(idx, source) {
+            const list = source === 'teacher' ? window.teacherFetchedRecs : window.userFetchedRecs; const rec = list[idx];
+            document.getElementById('breakdown-title').innerText = `${rec.moduleName} - 獨立考卷檢視`;
+            document.getElementById('breakdown-subtitle').innerText = `學生：${rec.studentName} | 總分：${rec.score} | 切屏警告：${rec.cheatingAttempts}`;
+            const box = document.getElementById('breakdown-content'); box.innerHTML = '';
+            rec.answers.forEach((ans, i) => { box.innerHTML += `<div class="p-4 mb-3 border rounded-xl ${ans.isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}"><p class="font-bold text-gray-800">Q${i+1}: ${ans.questionText} ${ans.isCorrect ? '✅' : '❌'}</p><p class="text-sm mt-2 text-gray-700">學生作答：${ans.userAnswer || '(未答)'}</p><p class="text-sm text-gray-700">標準答案：${ans.correctAnswer}</p><p class="text-xs text-gray-500 mt-1 font-semibold">詳解：${ans.explanation}</p></div>`; });
+            document.getElementById('modal-breakdown').classList.remove('hidden');
         }
+        window.closeBreakdownModal = () => document.getElementById('modal-breakdown').classList.add('hidden');
 
-        window.verifyTeacherPasscode = function() {
-            const pass = document.getElementById('teacher-passcode').value;
-            if (pass === 'teacher123') {
-                document.getElementById('modal-teacher-auth').classList.add('hidden');
-                openTeacherDashboard();
-            } else {
-                showCustomMessage("密碼錯誤", "教師登入密碼不正確！");
-            }
-        }
-
-        window.exitTeacherDashboard = function() {
-            if (currentStudentName) {
-                switchView('view-dashboard');
-            } else {
-                switchView('view-login');
-            }
-        }
-
-        function openTeacherDashboard() {
-            switchView('view-teacher-dashboard');
-            if (!db) {
-                document.getElementById('teacher-live-tbody').innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">無法連接雲端，請確認金鑰。</td></tr>';
-                document.getElementById('teacher-records-tbody').innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">無法
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
