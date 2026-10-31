@@ -137,7 +137,7 @@
                 <div class="mb-10">
                     <h3 class="text-lg font-bold mb-3 text-green-700">即時作答監控 (Live)</h3>
                     <div class="overflow-x-auto bg-gray-50 rounded-xl border">
-                        <table class="w-full text-left text-sm"><thead class="bg-gray-100 border-b"><tr><th class="p-3.5">姓名</th><th class="p-3.5">單元</th><th class="p-3.5">進度</th><th class="p-3.5">答對</th><th class="p-3.5">違規警告</th><th class="p-3.5">時間</th><th class="p-3.5">操作</th></tr></thead><tbody id="teacher-live-tbody"><tr><td colspan="7" class="p-4 text-center text-gray-400">連線中...</td></tr></tbody></table>
+                        <table class="w-full text-left text-sm"><thead class="bg-gray-100 border-b"><tr><th class="p-3.5">姓名</th><th class="p-3.5">單元</th><th class="p-3.5">進度</th><th class="p-3.5">答對</th><th class="p-3.5">違規警告</th><th class="p-3.5">時間</th><th class="p-3.5">管理操作</th></tr></thead><tbody id="teacher-live-tbody"><tr><td colspan="7" class="p-4 text-center text-gray-400">連線中...</td></tr></tbody></table>
                     </div>
                 </div>
                 <div>
@@ -192,10 +192,11 @@
         </div>
     </div>
 
+    <!-- 修正：將 Firebase 模組載入版本降級為最穩定的 10.12.2，避免無法載入造成的按鈕死當 -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, doc, setDoc, getDoc, deleteDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, getDoc, deleteDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCauX-RRzjdPJntpZULukLwa4D12SY6k0E", authDomain: "november-senior-english-e-l.firebaseapp.com",
@@ -262,7 +263,7 @@ The main feature of the __24__ is a dance called the Bon Odori. This dance provi
                     {q: "8. James never leaves the house ________ double-checking if the door is locked.", o: ["(A) unless", "(B) instead of", "(C) without", "(D) outside"], a: 2, e: "正解: (C)"},
                     {q: "9. The famous actor was seen ________ coffee at a local café yesterday morning.", o: ["(A) drink", "(B) to drinking", "(C) drinking", "(D) drank"], a: 2, e: "正解: (C)"},
                     {q: "10. No success can be achieved ________ hard work and determination.", o: ["(A) with", "(B) without", "(C) by", "(D) through"], a: 1, e: "正解: (B)"},
-                    {q: "11. The explosion was so loud that it was heard ________ miles away.", o: ["(A) to happen", "(B) happening", "(C) happened", "(D) happen"], a: 0, e: "正解: (A)"},
+                    {q: "11. The explosion was so loud that it was heard ________ miles away.", o: ["(A) to happen", "(B) happening", "(C) happening", "(D) happen"], a: 0, e: "正解: (A)"},
                     {q: "12. She can't speak of her late grandmother ________ tearing up.", o: ["(A) out of", "(B) behind", "(C) without", "(D) beneath"], a: 2, e: "正解: (C)"},
                     {q: "13. The suspect was seen ________ a black bag into the river before he ran away.", o: ["(A) to throw", "(B) throw", "(C) threw", "(D) thrown"], a: 0, e: "正解: (A)"},
                     {q: "14. Don't go out in the heavy rain ________ taking an umbrella.", o: ["(A) with", "(B) except", "(C) without", "(D) besides"], a: 2, e: "正解: (C)"},
@@ -556,4 +557,268 @@ The main feature of the __24__ is a dance called the Bon Odori. This dance provi
 
         function switchView(id) {
             ['view-login', 'view-dashboard', 'view-quiz', 'view-records', 'view-teacher-dashboard'].forEach(v => document.getElementById(v).classList.add('hidden'));
-            document.
+            document.getElementById(id).classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        async function initApp() {
+            setupAntiCheat();
+            try { app = initializeApp(firebaseConfig); db = getFirestore(app); auth = getAuth(app); } catch(e) {}
+            document.getElementById('btn-login').addEventListener('click', handleLogin);
+        }
+
+        async function handleLogin() {
+            const name = document.getElementById('student-name').value.trim();
+            if (!name) return alert("請輸入您的姓名！");
+            document.getElementById('btn-login').innerText = '連線中...';
+            try { if (auth) { await signInAnonymously(auth); currentUser = auth.currentUser; } } catch(e) { currentUser = { uid: 'local_' + Date.now() }; }
+            currentStudentName = name;
+            document.getElementById('display-student-name').innerText = name;
+            document.getElementById('nav-user-info').classList.remove('hidden');
+            document.getElementById('btn-teacher-nav').classList.add('hidden');
+            switchView('view-dashboard');
+            document.getElementById('btn-login').innerText = '進入測驗系統';
+        }
+
+        window.checkDraftAndStart = async function(moduleId) {
+            activeModule = moduleId; 
+            if (currentUser && db && !currentUser.uid.startsWith('local_')) {
+                try {
+                    const snap = await getDoc(doc(db, 'artifacts', 'english-course-l4l6', 'users', currentUser.uid, 'progress', moduleId));
+                    if (snap.exists() && snap.data().currentQIndex > 0) {
+                        pendingDraftData = snap.data();
+                        document.getElementById('resume-description').innerText = `偵測到「${quizData[moduleId].title}」有未完成紀錄。`;
+                        document.getElementById('modal-resume').classList.remove('hidden');
+                        return;
+                    }
+                } catch(e) {}
+            }
+            startNewQuiz(true);
+        }
+        
+        window.confirmResumeQuiz = function() {
+            document.getElementById('modal-resume').classList.add('hidden');
+            if (!pendingDraftData) return;
+            
+            if (pendingDraftData.questionOrder) {
+                currentQuestions = pendingDraftData.questionOrder.map(idx => quizData[activeModule].questions[idx]);
+            } else {
+                currentQuestions = quizData[activeModule].questions;
+            }
+            
+            currentQIndex = pendingDraftData.currentQIndex; currentScore = pendingDraftData.currentScore || 0;
+            cheatingAttempts = pendingDraftData.cheatingAttempts || 0; userAnswersHistory = pendingDraftData.answers || [];
+            isQuizActive = true; document.getElementById('quiz-title').innerText = quizData[activeModule].title;
+            renderQuestion(); switchView('view-quiz');
+        }
+        window.confirmRestartQuiz = function() { document.getElementById('modal-resume').classList.add('hidden'); startNewQuiz(true); }
+
+        function startNewQuiz(shouldShuffle = true) {
+            currentQIndex = 0; currentScore = 0; cheatingAttempts = 0; userAnswersHistory = []; isQuizActive = true;
+            
+            let original = quizData[activeModule].questions.map((q, i) => ({...q, originalIndex: i}));
+            
+            if (shouldShuffle) {
+                let groups = [], currentGroup = [], currentPassage = null;
+                
+                original.forEach(q => {
+                    if (q.p) {
+                        if (q.p === currentPassage) { currentGroup.push(q); } 
+                        else {
+                            if (currentGroup.length > 0) groups.push(currentGroup);
+                            currentGroup = [q]; currentPassage = q.p;
+                        }
+                    } else {
+                        if (currentGroup.length > 0) { groups.push(currentGroup); currentGroup = []; currentPassage = null; }
+                        groups.push([q]);
+                    }
+                });
+                if (currentGroup.length > 0) groups.push(currentGroup);
+                
+                for (let i = groups.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [groups[i], groups[j]] = [groups[j], groups[i]];
+                }
+                currentQuestions = groups.flat();
+            } else {
+                currentQuestions = original;
+            }
+
+            document.getElementById('quiz-title').innerText = quizData[activeModule].title;
+            renderQuestion(); switchView('view-quiz');
+        }
+
+        async function autoSaveProgress() {
+            if (!currentUser || !db || !isQuizActive || currentUser.uid.startsWith('local_')) return;
+            const payload = {
+                studentName: currentStudentName, userId: currentUser.uid, moduleId: activeModule, moduleTitle: quizData[activeModule].title,
+                currentQIndex, totalQuestions: currentQuestions.length, currentScore, cheatingAttempts, answers: userAnswersHistory,
+                questionOrder: currentQuestions.map(q => q.originalIndex),
+                lastUpdated: Date.now(), formattedTime: new Date().toLocaleTimeString()
+            };
+            try {
+                await setDoc(doc(db, 'artifacts', 'english-course-l4l6', 'users', currentUser.uid, 'progress', activeModule), payload);
+                await setDoc(doc(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_progress', `${currentUser.uid}_${activeModule}`), payload);
+            } catch(e) {}
+        }
+
+        function renderQuestion() {
+            const q = currentQuestions[currentQIndex];
+            document.getElementById('quiz-progress').innerText = `${currentQIndex + 1} / ${currentQuestions.length}`;
+            document.getElementById('question-text').innerText = q.q;
+            
+            const passageBox = document.getElementById('passage-container');
+            if (q.p) { passageBox.classList.remove('hidden'); document.getElementById('passage-text').innerText = q.p; } else { passageBox.classList.add('hidden'); }
+            
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            document.getElementById('btn-next-question').classList.add('hidden');
+            document.getElementById('btn-finish-quiz').classList.add('hidden');
+
+            const optionsBox = document.getElementById('options-container');
+            const textBox = document.getElementById('text-input-container');
+
+            if (q.t === 'text') {
+                optionsBox.classList.add('hidden'); textBox.classList.remove('hidden');
+                document.getElementById('spelling-prefix').innerText = q.f;
+                const input = document.getElementById('spelling-input');
+                input.value = ''; input.disabled = false; input.focus(); document.getElementById('btn-submit-text').disabled = false;
+                input.onkeyup = (e) => { if (e.key === 'Enter') submitTextAnswer(); };
+            } else {
+                textBox.classList.add('hidden'); optionsBox.classList.remove('hidden'); optionsBox.innerHTML = '';
+                q.o.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full text-left px-5 py-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 bg-white font-medium option-btn";
+                    btn.innerText = opt; btn.onclick = () => selectMCOption(idx, btn, q); optionsBox.appendChild(btn);
+                });
+            }
+        }
+
+        function selectMCOption(idx, btn, q) {
+            const isCorrect = (idx === q.a);
+            document.querySelectorAll('.option-btn').forEach(b => { b.disabled = true; b.classList.add('cursor-not-allowed'); });
+            if (isCorrect) { currentScore++; btn.classList.replace('border-gray-200', 'border-green-500'); btn.classList.add('bg-green-50'); } 
+            else { btn.classList.replace('border-gray-200', 'border-red-500'); }
+            recordAnswer(q, q.o[idx], q.o[q.a], isCorrect);
+        }
+        window.submitTextAnswer = function() {
+            const q = currentQuestions[currentQIndex]; const input = document.getElementById('spelling-input'); const val = input.value.trim().toLowerCase();
+            if (!val) return; input.disabled = true; document.getElementById('btn-submit-text').disabled = true;
+            const isCorrect = (val === q.a.toLowerCase() || (q.f.toLowerCase() + val) === q.a.toLowerCase());
+            if (isCorrect) { currentScore++; input.classList.add('border-green-500', 'bg-green-50'); } else { input.classList.add('border-red-500', 'bg-red-50'); }
+            recordAnswer(q, val, q.a, isCorrect);
+        }
+
+        function recordAnswer(q, userAns, correctAns, isCorrect) {
+            userAnswersHistory[currentQIndex] = { questionText: q.q, userAnswer: userAns, correctAnswer: correctAns, isCorrect, explanation: q.e };
+            autoSaveProgress(); showFeedback(isCorrect, q.e);
+        }
+
+        function showFeedback(isCorrect, expl) {
+            const fb = document.getElementById('quiz-feedback'); fb.classList.remove('hidden');
+            fb.className = `mb-6 p-4 rounded-xl border ${isCorrect ? 'bg-green-100 border-green-200 text-green-800' : 'bg-red-100 border-red-200 text-red-800'}`;
+            fb.innerHTML = `<p class="font-bold"> ${isCorrect ? '✅ 答對了！' : '❌ 答錯了。'}</p><p class="text-sm mt-1">${expl}</p>`;
+            if (currentQIndex < currentQuestions.length - 1) {
+                const nxt = document.getElementById('btn-next-question'); nxt.classList.remove('hidden'); nxt.onclick = () => { currentQIndex++; renderQuestion(); };
+            } else {
+                const fin = document.getElementById('btn-finish-quiz'); fin.classList.remove('hidden'); fin.onclick = finishQuiz;
+            }
+        }
+
+        async function finishQuiz() {
+            isQuizActive = false; const finalScore = Math.round((currentScore / currentQuestions.length) * 100);
+            const payload = {
+                studentName: currentStudentName, userId: currentUser ? currentUser.uid : 'local', moduleName: quizData[activeModule].title,
+                score: finalScore, cheatingAttempts, answers: userAnswersHistory, timestamp: new Date().toLocaleString(), serverTime: Date.now()
+            };
+            let localHist = JSON.parse(localStorage.getItem(`hist_${currentStudentName}`) || '[]');
+            localHist.push(payload); localStorage.setItem(`hist_${currentStudentName}`, JSON.stringify(localHist));
+
+            if (currentUser && db && !currentUser.uid.startsWith('local_')) {
+                try {
+                    await addDoc(collection(db, 'artifacts', 'english-course-l4l6', 'users', currentUser.uid, 'records'), payload);
+                    await addDoc(collection(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_records'), payload);
+                    await deleteDoc(doc(db, 'artifacts', 'english-course-l4l6', 'users', currentUser.uid, 'progress', activeModule));
+                    await deleteDoc(doc(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_progress', `${currentUser.uid}_${activeModule}`));
+                    alert(`測驗完成！得分：${finalScore} 分 (成績已上傳)`);
+                } catch(e) { alert(`測驗完成！得分：${finalScore} 分`); }
+            } else { alert(`測驗完成！得分：${finalScore} 分`); }
+            showDashboard();
+        }
+
+        window.showDashboard = () => { isQuizActive = false; switchView('view-dashboard'); };
+        window.promptTeacherAuth = () => { document.getElementById('teacher-passcode').value = ''; document.getElementById('modal-teacher-auth').classList.remove('hidden'); };
+        window.closeTeacherAuthModal = () => document.getElementById('modal-teacher-auth').classList.add('hidden');
+        window.verifyTeacherPasscode = () => { if(document.getElementById('teacher-passcode').value === 'teacher123') { closeTeacherAuthModal(); openTeacherDashboard(); } else alert("身分驗證失敗！"); };
+        window.exitTeacherDashboard = () => switchView(currentStudentName ? 'view-dashboard' : 'view-login');
+
+        function openTeacherDashboard() {
+            switchView('view-teacher-dashboard'); if(!db) return;
+            if(teacherLiveUnsub) teacherLiveUnsub();
+            teacherLiveUnsub = onSnapshot(collection(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_progress'), snap => {
+                const tb = document.getElementById('teacher-live-tbody'); tb.innerHTML = '';
+                if(snap.empty) { tb.innerHTML = '<tr><td colspan="7" class="p-4 text-center">無學生作答中</td></tr>'; return; }
+                snap.forEach(docSnap => { 
+                    const d = docSnap.data(); 
+                    const docId = docSnap.id;
+                    tb.innerHTML += `<tr class="border-b hover:bg-gray-100"><td class="p-3.5 font-bold">${d.studentName}</td><td class="p-3.5 text-blue-700">${d.moduleTitle}</td><td class="p-3.5">${d.currentQIndex+1}/${d.totalQuestions}</td><td class="p-3.5 text-green-600 font-bold">${d.currentScore}</td><td class="p-3.5 text-red-500 font-bold">${d.cheatingAttempts}次</td><td class="p-3.5 text-xs text-gray-500">${d.formattedTime}</td><td class="p-3.5"><button onclick="deleteProgressRecord('${docId}')" class="bg-red-100 hover:bg-red-200 text-red-800 px-2 py-1 rounded text-xs font-bold transition">刪除進度</button></td></tr>`; 
+                });
+            });
+            if(teacherRecordsUnsub) teacherRecordsUnsub();
+            teacherRecordsUnsub = onSnapshot(collection(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_records'), snap => {
+                const tb = document.getElementById('teacher-records-tbody'); tb.innerHTML = ''; window.teacherFetchedRecs = [];
+                if(snap.empty) { tb.innerHTML = '<tr><td colspan="6" class="p-4 text-center">無交卷紀錄</td></tr>'; return; }
+                let arr = []; snap.forEach(document => { let data = document.data(); data.docId = document.id; arr.push(data); });
+                arr.sort((a,b) => b.serverTime - a.serverTime); window.teacherFetchedRecs = arr;
+                arr.forEach((r, idx) => { tb.innerHTML += `<tr class="border-b hover:bg-gray-100"><td class="p-3.5 font-bold">${r.studentName}</td><td class="p-3.5">${r.moduleName}</td><td class="p-3.5 font-bold ${r.score>=60?'text-blue-600':'text-red-600'}">${r.score}分</td><td class="p-3.5 text-red-500 font-bold">${r.cheatingAttempts}次</td><td class="p-3.5 text-xs text-gray-500">${r.timestamp}</td><td class="p-3.5 flex gap-1"><button onclick="viewRecordDetail(${idx}, 'teacher')" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-2 py-1 rounded text-xs font-bold transition">查看</button><button onclick="editRecordName(${idx})" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-2 py-1 rounded text-xs font-bold transition">改名</button><button onclick="deleteRecord(${idx})" class="bg-red-100 hover:bg-red-200 text-red-800 px-2 py-1 rounded text-xs font-bold transition">刪除</button></td></tr>`; });
+            });
+        }
+
+        window.deleteProgressRecord = async function(docId) {
+            if(confirm(`⚠️ 刪除進行中進度確認\n確定要強制清除這筆作答中的進度嗎？`)) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_progress', docId));
+                } catch(e) { alert("刪除失敗：" + e.message); }
+            }
+        }
+
+        window.editRecordName = async function(idx) {
+            const rec = window.teacherFetchedRecs[idx];
+            const newName = prompt(`修改姓名\n目前紀錄為：「${rec.studentName}」\n請輸入修正後的姓名：`, rec.studentName);
+            if (newName && newName.trim() !== "" && newName !== rec.studentName) {
+                try {
+                    await updateDoc(doc(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_records', rec.docId), { studentName: newName.trim() });
+                } catch(e) { alert("改名失敗：" + e.message); }
+            }
+        }
+
+        window.deleteRecord = async function(idx) {
+            const rec = window.teacherFetchedRecs[idx];
+            if(confirm(`⚠️ 刪除確認\n確定要刪除學生「${rec.studentName}」的「${rec.moduleName}」測驗紀錄嗎？\n(此動作刪除後無法復原)`)) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_records', rec.docId));
+                } catch(e) { alert("刪除失敗：" + e.message); }
+            }
+        }
+
+        window.showRecords = function() {
+            switchView('view-records'); const tb = document.getElementById('records-table-body'); tb.innerHTML = '';
+            let hist = JSON.parse(localStorage.getItem(`hist_${currentStudentName}`) || '[]'); window.userFetchedRecs = hist.sort((a,b) => b.serverTime - a.serverTime);
+            if(hist.length===0) { document.getElementById('no-records-msg').classList.remove('hidden'); return; }
+            document.getElementById('no-records-msg').classList.add('hidden');
+            hist.forEach((r, idx) => { tb.innerHTML += `<tr class="border-b"><td class="p-4 font-medium">${r.moduleName}</td><td class="p-4 text-sm text-gray-500">${r.timestamp}</td><td class="p-4 font-bold ${r.score>=60?'text-blue-600':'text-red-600'}">${r.score}分</td><td class="p-4 text-red-500 font-bold">${r.cheatingAttempts}次警告</td><td class="p-4"><button onclick="viewRecordDetail(${idx}, 'user')" class="text-blue-600 hover:text-blue-800 underline text-sm font-semibold">對答明細</button></td></tr>`; });
+        }
+
+        window.viewRecordDetail = function(idx, source) {
+            const list = source === 'teacher' ? window.teacherFetchedRecs : window.userFetchedRecs; const rec = list[idx];
+            document.getElementById('breakdown-title').innerText = `${rec.moduleName} - 獨立考卷檢視`;
+            document.getElementById('breakdown-subtitle').innerText = `學生：${rec.studentName} | 總分：${rec.score} | 切屏警告：${rec.cheatingAttempts}`;
+            const box = document.getElementById('breakdown-content'); box.innerHTML = '';
+            rec.answers.forEach((ans, i) => { box.innerHTML += `<div class="p-4 mb-3 border rounded-xl ${ans.isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}"><p class="font-bold text-gray-800">Q${i+1}: ${ans.questionText} ${ans.isCorrect ? '✅' : '❌'}</p><p class="text-sm mt-2 text-gray-700">學生作答：${ans.userAnswer || '(未答)'}</p><p class="text-sm text-gray-700">標準答案：${ans.correctAnswer}</p><p class="text-xs text-gray-500 mt-1 font-semibold">詳解：${ans.explanation}</p></div>`; });
+            document.getElementById('modal-breakdown').classList.remove('hidden');
+        }
+        window.closeBreakdownModal = () => document.getElementById('modal-breakdown').classList.add('hidden');
+
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
