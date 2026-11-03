@@ -47,7 +47,14 @@
         <div id="view-dashboard" class="hidden w-full max-w-5xl fade-in my-6">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
                 <div><h2 class="text-3xl font-bold text-gray-800">各單元複習與測驗</h2><p class="text-gray-600 mt-1">請選擇欲練習的單元與題型。</p></div>
-                <button onclick="showRecords()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-semibold shadow hover:bg-indigo-700">查看個人歷程與對答明細</button>
+                
+                <div class="flex space-x-2">
+                    <button onclick="showMistakes()" class="bg-orange-500 text-white px-4 py-2.5 rounded-lg font-semibold shadow hover:bg-orange-600 flex items-center">
+                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        我的錯題本
+                    </button>
+                    <button onclick="showRecords()" class="bg-indigo-600 text-white px-4 py-2.5 rounded-lg font-semibold shadow hover:bg-indigo-700">對答明細</button>
+                </div>
             </div>
 
             <h3 class="text-lg font-bold text-gray-700 mb-3 border-l-4 border-blue-600 pl-2">課本文法專區 (單句選擇)</h3>
@@ -73,7 +80,7 @@
 
             <h3 class="text-lg font-bold text-gray-700 mb-3 border-l-4 border-teal-500 pl-2">課本文意選填 (含段落題組與大題)</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md cursor-pointer hover:border-teal-300" onclick="checkDraftAndStart('L4_Cloze')"><span class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Lesson 4</span><h4 class="font-bold">L4 文意選填 (35題)</h4></div>
+                <div class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md cursor-pointer hover:border-teal-300" onclick="checkDraftAndStart('L4_Cloze')"><span class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Lesson 4</span><h4 class="font-bold">L4 文意選填 (30題)</h4></div>
                 <div class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md cursor-pointer hover:border-teal-300" onclick="checkDraftAndStart('L5_Cloze')"><span class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Lesson 5</span><h4 class="font-bold">L5 文意選填 (20題)</h4></div>
                 <div class="bg-white rounded-xl shadow-sm border p-5 hover:shadow-md cursor-pointer hover:border-teal-300" onclick="checkDraftAndStart('L6_Cloze')"><span class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Lesson 6</span><h4 class="font-bold">L6 文意選填 (24題)</h4></div>
             </div>
@@ -124,6 +131,28 @@
                         <tbody id="records-table-body"></tbody>
                     </table>
                     <div id="no-records-msg" class="hidden text-center py-8 text-gray-500">尚無紀錄</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="view-mistakes" class="hidden w-full max-w-4xl fade-in my-6">
+            <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                            <span class="bg-orange-100 text-orange-600 p-2 rounded-lg mr-2">📖</span>我的專屬錯題本
+                        </h2>
+                        <p class="text-gray-500 text-sm mt-2">系統已自動為您統整過去答錯的題目。次數越多的代表越不熟喔！</p>
+                    </div>
+                    <button onclick="showDashboard()" class="bg-gray-100 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200">返回主選單</button>
+                </div>
+                
+                <div id="mistakes-container" class="space-y-4"></div>
+                
+                <div id="no-mistakes-msg" class="hidden text-center py-12 text-gray-500">
+                    <div class="text-5xl mb-4">🎉</div>
+                    <h3 class="text-xl font-bold text-gray-700">太棒了！</h3>
+                    <p class="mt-2">您目前沒有任何錯題紀錄，繼續保持！</p>
                 </div>
             </div>
         </div>
@@ -192,7 +221,6 @@
         </div>
     </div>
 
-    <!-- 修正：將 Firebase 模組載入版本降級為最穩定的 10.12.2，避免無法載入造成的按鈕死當 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -213,101 +241,108 @@ After a while, I reached a small, unusual village. The houses were painted in st
 A kind elderly man named Yacob had been ___17___ me since I arrived. He showed me how the people there lived using other senses instead of sight. I was amazed ___18___ how well these people could live without being able to see. Then, I met a beautiful girl named Medina. I thought I was falling in love.
 However, the villagers did not believe that I could see. They thought I was ___19___ dishonest or crazy and that sight was not real. Even Medina didn't believe me, and she insisted that I remove my eyes to ___20___ to life in the village. It broke my heart to leave Medina, but I knew I couldn't give up my sight. Finally, I escaped from the village on the morning of my surgery.`;
 
-        const CL4_1 = `【單字庫】(A) occasion  (B) concept  (C) sorrow  (D) accompany  (E) reunion  (F) essential  (G) mourn  (H) joyous\nHave you ever thought about what it would be like to have a deceased loved one return and (1) ________ you to a holiday celebration? The idea may scare you to death or at least make your hair stand on end, but this is the (2) ________ (3) ________ behind the Mexican festival called the Day of the Dead, when people celebrate death with joy and humor rather than (4) ________ it with (5) ________. On this (6) ________ (7) ________, family members gather for a (8) ________ in honor of those who have moved on to the afterlife.`;
-        const CL4_2 = `【單字庫】(A) dawn  (B) reception  (C) arrival  (D) transforming  (E) preference  (F) anticipate  (G) feast  (H) decorate\n...Instead of fearing these spirits, Mexicans (1) ________ their (2) ________ and prepare for it by purchasing necessary items in local markets in advance. ... On the altars, they place photographs of their deceased loved ones as well as beverages and dishes that those family members had a (3) ________ for while alive. After this warm (4) ________ for the souls at home, it is usually late in the evening, and families head to the cemetery, where they (5) ________ the graves of their loved ones and light one candle for each dead person. Cheerful and merry, they (6) ________ with the honored souls and pray till (7) ________, (8) ________ the normally horrifying graveyard into a venue of joy and celebration for the entire night.`;
-        const CL4_3 = `【單字庫】(A) escape  (B) recognizing  (C) annual  (D) cycle  (E) mocking  (F) inevitable  (G) awaits  (H) participate  (I) resemble\nMany people also dress up in skeleton costumes, paint their faces to (1) ________ skulls, and (2) ________ in performances and street parades. While doing so, Mexicans aren't (3) ________ death. Instead, they are (4) ________ it as an (5) ________ part of the natural (6) ________ and would rather embrace it than ignore it. ... The Mexican Day of the Dead is an (7) ________ national event that brings together living hosts and non-living guests of honor. Hopefully, this tradition will never die out, since it helps people accept a fact of life that (8) ________ us all. If we cannot (9) ________ death, why not celebrate it?`;
-        const CL4_4 = `【單字庫】(A) throughout (B) in (C) resemble (D) joyous (E) honor (F) accompany (G) for (H) sorrowful (I) occasion (J) essential\nOne of the most common traditions shared around the world is a yearly festival for the dead. It seems natural that a festival about death would be __21__, but usually this is not the case. Often, in fact, things are quite __22__, with feasting and dancing. This is certainly true in Japan; people there celebrate Bon every summer. This festival, held in __23__ of departed ancestors, has been observed for many centuries.
-The main feature of the __24__ is a dance called the Bon Odori. This dance provides a reception __25__ the spirits who return. Places __26__ Japan have their unique style of dance and music. For example, in a mining area, the dance might __27__ the movements of miners. Most dances have some __28__ aspects that are the same. Dancers dress up __29__ traditional clothing and usually hold a fan or small towel to wave while dancing. The end of Bon features giant fires to __30__ the spirits as they leave the world. These fires burn across the country for Japan's biggest festival.`;
+        // 獨立出每個題組的文章變數，供每一題重複使用，解決「同上」問題
+        const CL4_1 = `【單字庫】\n(A) occasion  (B) concept  (C) sorrow  (D) accompany\n(E) reunion  (F) essential  (G) mourn  (H) joyous\n\nHave you ever thought about what it would be like to have a deceased loved one return and (1) ________ you to a holiday celebration? The idea may scare you to death or at least make your hair stand on end, but this is the (2) ________ (3) ________ behind the Mexican festival called the Day of the Dead, when people celebrate death with joy and humor rather than (4) ________ it with (5) ________. On this (6) ________ (7) ________, family members gather for a (8) ________ in honor of those who have moved on to the afterlife.`;
+        const CL4_2 = `【單字庫】\n(A) dawn  (B) reception  (C) arrival  (D) transforming\n(E) preference  (F) anticipate  (G) feast  (H) decorate\n\n...Instead of fearing these spirits, Mexicans (1) ________ their (2) ________ and prepare for it by purchasing necessary items in local markets in advance. ... On the altars, they place photographs of their deceased loved ones as well as beverages and dishes that those family members had a (3) ________ for while alive. After this warm (4) ________ for the souls at home, it is usually late in the evening, and families head to the cemetery, where they (5) ________ the graves of their loved ones and light one candle for each dead person. Cheerful and merry, they (6) ________ with the honored souls and pray till (7) ________, (8) ________ the normally horrifying graveyard into a venue of joy and celebration for the entire night.`;
+        const CL4_3 = `【單字庫】\n(A) escape  (B) recognizing  (C) annual  (D) cycle\n(E) mocking  (F) inevitable  (G) awaits  (H) participate  (I) resemble\n\nMany people also dress up in skeleton costumes, paint their faces to (1) ________ skulls, and (2) ________ in performances and street parades. While doing so, Mexicans aren't (3) ________ death. Instead, they are (4) ________ it as an (5) ________ part of the natural (6) ________ and would rather embrace it than ignore it. ... The Mexican Day of the Dead is an (7) ________ national event that brings together living hosts and non-living guests of honor. Hopefully, this tradition will never die out, since it helps people accept a fact of life that (8) ________ us all. If we cannot (9) ________ death, why not celebrate it?`;
+        
+        const CL5_1 = `【單字庫】\n(A) capital (B) rustling (C) boasts (D) blossoms\n(E) previously (F) landscape (G) historic (H) splendor\n\nIn spring, romance is in the air as the city is filled with a sea of pink cherry (1) ________. In summer, green leaves can be heard (2) ________ in the wind and seen sparkling in the sunshine. Maple leaves in autumn set the (3) ________ on fire with orange and red colors. ... Apart from its natural (4) ________, Kyoto has so much more to feast one's eyes on. Having (5) ________ been the (6) ________ of Japan for over a thousand years, the city (7) ________ a large number of (8) ________ shrines and temples.`;
+        const CL5_2 = `【單字庫】\n(A) breathtaking (B) stunning (C) magnificent\n(D) leisurely (E) entrance\n\nWith giant, leafy maple trees leading up to its main (1) ________, what comes into view is this (2) ________ three-story pavilion. Rising up behind a crystal-clear pond... The reflection of the pavilion on the glassy surface of the pond is a (3) ________ sight. Visitors can take a (4) ________ walk through the surrounding gardens and enjoy many (5) ________ views of this beautiful structure.`;
+        const CL5_3 = `【單字庫】\n(A) appearance (B) deliberate (C) distinctive\n(D) destination (E) elegant (F) delicate (G) literature\n\nAnother unforgettable Kyoto sight involves coming face to face with one of the old capital's very special "persons of art," or geishas. These are women dressed in (1) ________ kimonos with silk sleeves. Their (2) ________ white makeup, bright red lipstick, and (3) ________ hairpins also make them easy to recognize. And it's not just their unique (4) ________ that makes geishas stand out from the crowd. These highly skilled entertainers spend years mastering different musical instruments, songs, and (5) ________. Of course, no "person of art" could be a true geisha without being able to perform the traditional kyomai dance. This ancient art combines slow music with very (6) ________ movements and often expresses very deep emotion. ... Regardless of the season, the city is a must-see (7) ________ for tourists seeking an authentic local experience.`;
+
+        const CL6_1 = `【單字庫】\n(A) paths (B) bruised (C) navigate (D) intimately\n(E) tumbling (F) crops (G) superior (H) skillfully (I) slope\n\nNuñez slid down a snowy (1) ________ and fell over a cliff edge, (2) ________ a great distance. (3) ________ and dazed... Feeling (4) ________ to these sightless people... They knew their mountain kingdom (5) ________. The villagers (6) ________ farmed... effective techniques for growing (7) ________. The (8) ________ helped them (9) ________ safely.`;
+        const CL6_2 = `【單字庫】\n(A) pitied (B) adapted (C) smoothness\n(D) awe (E) outsider (F) twinkling (G) clung\n\nYacob put the (1) ________ to work. Nuñez (2) ________ to their way of life, but he (3) ________ to the reality of sight. The more he spoke of (4) ________ stars, the more they (5) ________ him. Lack of (6) ________. She lacked the (7) ________ the villagers valued.`;
+        const CL6_3 = `【單字庫】\n(A) peculiar (B) gazing (C) confronted (D) fled\n(E) opposition (F) envisioning (G) Nevertheless (H) dilemma\n\nDesire to marry faced (1) ________. Remove the (2) ________ orbs. Nuñez was (3) ________ with a (4) ________. (5) ________, it wasn't until the day of his surgery... (6) ________ at the landscape and (7) ________ all he might see... he (8) ________ the country.`;
 
         const quizData = {
             'L4_Grammar': {
-                title: "L4 文法測驗",
+                title: "L4 文法測驗 (加強防呆)",
                 questions: [
-                    {q: "1. The ancient pyramids are believed ______ built thousands of years ago.", o: ["(A) to be", "(B) to being", "(C) to have been", "(D) having been"], a: 2, e: "正解: (C)"},
-                    {q: "2. I would rather ________ at home reading a book than go out in this heavy rain.", o: ["(A) staying", "(B) stay", "(C) stayed", "(D) to stay"], a: 1, e: "正解: (B)"},
-                    {q: "3. The suspect is said _____ the country before the police issued the warrant.", o: ["(A) to leave", "(B) to leaving", "(C) to have left", "(D) having left"], a: 2, e: "正解: (C)"},
-                    {q: "4. Mary would ________ fail the test than cheat on it.", o: ["(A) better", "(B) prefer", "(C) like", "(D) rather"], a: 3, e: "正解: (D)"},
-                    {q: "5. The great fire is reported ________ hundreds of houses last night.", o: ["(A) to destroy", "(B) destroying", "(C) to have destroyed", "(D) destroyed"], a: 2, e: "正解: (C)"},
-                    {q: "6. My brother would rather walk to school_____ take the crowded bus.", o: ["(A) to", "(B) than", "(C) rather", "(D) from"], a: 1, e: "正解: (B)"},
-                    {q: "7. Drinking too much sugary beverage is generally thought ________ bad for your health.", o: ["(A) to be", "(B) is", "(C) to have been", "(D) being"], a: 0, e: "正解: (A)"},
-                    {q: "8. The students would play basketball outside rather than ________ in the classroom.", o: ["(A) studied", "(B) studying", "(C) study", "(D) to study"], a: 2, e: "正解: (C)"},
-                    {q: "9. The missing boy is believed ________ in the mountains, so the rescue team is searching there now.", o: ["(A) to be hiding", "(B) to have hidden", "(C) hiding", "(D) hide"], a: 0, e: "正解: (A)"},
-                    {q: "10. I would rather lose everything ________ live my life without you.", o: ["(A) as", "(B) then", "(C) than", "(D) to"], a: 2, e: "正解: (C)"},
-                    {q: "11. Arthur is said ________ a fortune in the stock market last year.", o: ["(A) to make", "(B) to have made", "(C) made", "(D) making"], a: 1, e: "正解: (B)"},
-                    {q: "12. She would rather ________ the truth than be comforted by a lie.", o: ["(A) known", "(B) knowing", "(C) know", "(D) to know"], a: 2, e: "正解: (C)"},
-                    {q: "13. The castle is thought ____ during the 16th century by a famous king.", o: ["(A) to build", "(B) to be built", "(C) to have been built", "(D) building"], a: 2, e: "正解: (C)"},
-                    {q: "14. We would rather ________ the game fairly than win by cheating.", o: ["(A) lose", "(B) to lose", "(C) losing", "(D) lost"], a: 0, e: "正解: (A)"},
-                    {q: "15. Eating a balanced diet is known ________ essential for maintaining good health.", o: ["(A) to be", "(B) being", "(C) to have been", "(D) be"], a: 0, e: "正解: (A)"},
-                    {q: "16. The singer would rather cancel the concert ________ perform with a sore throat.", o: ["(A) than", "(B) to", "(C) instead", "(D) but"], a: 0, e: "正解: (A)"},
-                    {q: "17. The rare bird is believed ________ extinct for over 50 years until it was spotted recently.", o: ["(A) to be", "(B) to have been", "(C) being", "(D) been"], a: 1, e: "正解: (B)"},
-                    {q: "18. I would rather you ________ me the truth earlier.", o: ["(A) tell", "(B) telling", "(C) had told", "(D) to tell"], a: 2, e: "正解: (C)"},
-                    {q: "19. He would order a pizza ________ cook dinner after a long day at work.", o: ["(A) instead", "(B) rather than", "(C) other than", "(D) more than"], a: 1, e: "正解: (B)"},
-                    {q: "20. The newly discovered painting is said _____ by Leonardo da Vinci.", o: ["(A) to paint", "(B) to be painted", "(C) to have been painted", "(D) painting"], a: 2, e: "正解: (C)"},
-                    {q: "21. They would rather ________ the meeting than make a hasty decision.", o: ["(A) postpone", "(B) postponing", "(C) postponed", "(D) to postpone"], a: 0, e: "正解: (A)"},
-                    {q: "22. The famous poet is thought ________ many unreleased poems before he died.", o: ["(A) to write", "(B) to have written", "(C) writing", "(D) wrote"], a: 1, e: "正解: (B)"},
-                    {q: "23. John would ________ a small car rather than buy a luxurious one he cannot afford.", o: ["(A) driving", "(B) to drive", "(C) drive", "(D) driven"], a: 2, e: "正解: (C)"},
-                    {q: "24. It is believed ________ the universe is expanding at a fast rate.", o: ["(A) what", "(B) that", "(C) which", "(D) where"], a: 1, e: "正解: (B)"},
-                    {q: "25. The general would rather die a meaningful death ________ live a meaningless life.", o: ["(A) then", "(B) than", "(C) to", "(D) but"], a: 1, e: "正解: (B)"}
+                    {q: "1. The ancient pyramids are believed ______ built thousands of years ago.", o: ["(A) to be", "(B) that they were", "(C) to have been", "(D) having been"], a: 2, e: "正解: (C) 因為建造(build)發生在被相信(are believed)之前，須用 to have p.p."},
+                    {q: "2. I would rather ________ at home reading a book than go out in this heavy rain.", o: ["(A) staying", "(B) stay", "(C) to stay", "(D) have stayed"], a: 1, e: "正解: (B) would rather + VR + than + VR"},
+                    {q: "3. The suspect is said _____ the country secretly before the police issued the warrant.", o: ["(A) to leave", "(B) leaving", "(C) to have left", "(D) that he left"], a: 2, e: "正解: (C) 離開國家發生在過去(before)，早於目前被據說(is said)，用 to have p.p."},
+                    {q: "4. Mary would ________ fail the test than cheat on it.", o: ["(A) prefer", "(B) like to", "(C) better", "(D) rather"], a: 3, e: "正解: (D) 句型為 would rather VR than VR。若選 prefer 需接 to V rather than V。"},
+                    {q: "5. The great fire is reported ________ hundreds of houses in the downtown area last night.", o: ["(A) to destroy", "(B) it destroyed", "(C) destroying", "(D) to have destroyed"], a: 3, e: "正解: (D) 昨晚的火災(早於現在的報導)，需用完成式不定詞 to have p.p."},
+                    {q: "6. My brother would rather walk to school _____ take the crowded bus during rush hour.", o: ["(A) to", "(B) than", "(C) instead of", "(D) rather than"], a: 1, e: "正解: (B) would rather... than... 是固定用法。"},
+                    {q: "7. Drinking too much sugary beverage is generally thought ________ bad for your health.", o: ["(A) to be", "(B) is", "(C) to have been", "(D) being"], a: 0, e: "正解: (A) 表述一般事實，前後時間一致，用 to be 即可。"},
+                    {q: "8. The students would play basketball outside rather than ________ in the classroom.", o: ["(A) studied", "(B) studying", "(C) study", "(D) to study"], a: 2, e: "正解: (C) rather than 後面接原形動詞以對稱前面的 play。"},
+                    {q: "9. The missing boy is believed ________ in the mountains, so the rescue team is searching there now.", o: ["(A) to be hiding", "(B) to have hidden", "(C) that he hides", "(D) hide"], a: 0, e: "正解: (A) 救援隊「現在」正在找，表示男孩「正在」躲藏，用 to be V-ing。"},
+                    {q: "10. I would rather lose everything ________ live my life without you.", o: ["(A) than", "(B) then", "(C) as", "(D) to"], a: 0, e: "正解: (A) would rather... than (寧願...也不願)。"},
+                    {q: "11. Arthur is said ________ a fortune in the stock market before the crash last year.", o: ["(A) to make", "(B) to have made", "(C) made", "(D) that he made"], a: 1, e: "正解: (B) 在去年的崩盤「之前」賺大錢，時間更早，用 to have p.p."},
+                    {q: "12. She would rather ________ the truth than be comforted by a beautiful lie.", o: ["(A) known", "(B) knowing", "(C) to know", "(D) know"], a: 3, e: "正解: (D) would rather 後面接原形動詞。"},
+                    {q: "13. The castle is thought ____ during the 16th century by a famous king.", o: ["(A) to build", "(B) to be built", "(C) to have been built", "(D) that it was built"], a: 2, e: "正解: (C) 16世紀被建造(過去被動)，結合 thought (現在)，用 to have been p.p."},
+                    {q: "14. We would rather ________ the game fairly than win by cheating.", o: ["(A) lose", "(B) to lose", "(C) losing", "(D) lost"], a: 0, e: "正解: (A) would rather + 原形動詞。"},
+                    {q: "15. Eating a balanced diet is known ________ essential for maintaining good health.", o: ["(A) is", "(B) being", "(C) to have been", "(D) to be"], a: 3, e: "正解: (D) 一般客觀事實，用 to be。"},
+                    {q: "16. The singer would rather cancel the concert ________ perform with a sore throat.", o: ["(A) than", "(B) instead of", "(C) rather than", "(D) but"], a: 0, e: "正解: (A) would rather VR than VR。"},
+                    {q: "17. The rare bird is believed ________ extinct for over 50 years until it was spotted recently.", o: ["(A) to be", "(B) to have been", "(C) that it is", "(D) been"], a: 1, e: "正解: (B) 絕種50年發生在最近被發現之前，用 to have been。"},
+                    {q: "18. I would rather you ________ me the truth earlier instead of lying to me.", o: ["(A) tell", "(B) telling", "(C) had told", "(D) told"], a: 2, e: "正解: (C) would rather 後接子句表示「與過去事實相反」的假設，用過去完成式(had p.p.)。"},
+                    {q: "19. He would order a pizza ________ cook dinner after a long, exhausting day at work.", o: ["(A) rather than", "(B) instead of", "(C) other than", "(D) more than"], a: 0, e: "正解: (A) would (rather) VR rather than VR。此處為 would VR rather than VR 變體。"},
+                    {q: "20. The newly discovered painting is said _____ by Leonardo da Vinci centuries ago.", o: ["(A) to paint", "(B) to be painted", "(C) to have been painted", "(D) that it was painted"], a: 2, e: "正解: (C) 幾百年前被畫(被動+早於現在)，用 to have been p.p."},
+                    {q: "21. They would rather ________ the meeting than make a hasty decision today.", o: ["(A) postpone", "(B) postponing", "(C) postponed", "(D) to postpone"], a: 0, e: "正解: (A) would rather + 原形動詞。"},
+                    {q: "22. The famous poet is thought ________ many unreleased poems before he died.", o: ["(A) to write", "(B) to have written", "(C) that he wrote", "(D) wrote"], a: 1, e: "正解: (B) 在死前寫的(過去)，早於現在被認為，用 to have p.p."},
+                    {q: "23. John would prefer to drive a small car ________ buy a luxurious one he cannot afford.", o: ["(A) than", "(B) rather than", "(C) instead of", "(D) to"], a: 1, e: "正解: (B) prefer to V1 *rather than* V2。注意這題是用 prefer to 而不是 would rather。"},
+                    {q: "24. It is believed ________ the universe is expanding at a fast rate.", o: ["(A) what", "(B) that", "(C) which", "(D) to"], a: 1, e: "正解: (B) 虛主詞 It is believed that + 子句。不能選 to，因為後面是完整子句。"},
+                    {q: "25. The general would rather die a meaningful death ________ live a meaningless life.", o: ["(A) than", "(B) to", "(C) instead of", "(D) rather than"], a: 0, e: "正解: (A) would rather + VR + than + VR。"}
                 ]
             },
             'L5_Grammar': {
-                title: "L5 文法測驗",
+                title: "L5 文法測驗 (雙重否定與感官被動強化)",
                 questions: [
-                    {q: "1. A strange man was seen ________ into the house through the back window last night.", o: ["(A) sneak", "(B) sneaked", "(C) to sneak", "(D) sneaks"], a: 2, e: "正解: (C)"},
-                    {q: "2. I never watch this touching movie ________ crying.", o: ["(A) with", "(B) without", "(C) instead of", "(D) for"], a: 1, e: "正解: (B)"},
-                    {q: "3. The little girl was heard ________ beautifully in her room when I walked past.", o: ["(A) to singing", "(B) sing", "(C) singing", "(D) sang"], a: 2, e: "正解: (C)"},
-                    {q: "4. You cannot make an omelet ________ breaking a few eggs.", o: ["(A) without", "(B) by", "(C) unless", "(D) from"], a: 0, e: "正解: (A)"},
-                    {q: "5. The thief was caught on camera and was seen ________ the jewelry from the safe.", o: ["(A) stealing", "(B) steal", "(C) stole", "(D) to stealing"], a: 0, e: "正解: (A)"},
-                    {q: "6. There is no rule ________ exceptions.", o: ["(A) has", "(B) without", "(C) having", "(D) except"], a: 1, e: "正解: (B)"},
-                    {q: "7. Several dogs were heard ________ loudly in the alley at midnight.", o: ["(A) bark", "(B) barking", "(C) to barking", "(D) barked"], a: 1, e: "正解: (B)"},
-                    {q: "8. James never leaves the house ________ double-checking if the door is locked.", o: ["(A) unless", "(B) instead of", "(C) without", "(D) outside"], a: 2, e: "正解: (C)"},
-                    {q: "9. The famous actor was seen ________ coffee at a local café yesterday morning.", o: ["(A) drink", "(B) to drinking", "(C) drinking", "(D) drank"], a: 2, e: "正解: (C)"},
-                    {q: "10. No success can be achieved ________ hard work and determination.", o: ["(A) with", "(B) without", "(C) by", "(D) through"], a: 1, e: "正解: (B)"},
-                    {q: "11. The explosion was so loud that it was heard ________ miles away.", o: ["(A) to happen", "(B) happening", "(C) happening", "(D) happen"], a: 0, e: "正解: (A)"},
-                    {q: "12. She can't speak of her late grandmother ________ tearing up.", o: ["(A) out of", "(B) behind", "(C) without", "(D) beneath"], a: 2, e: "正解: (C)"},
-                    {q: "13. The suspect was seen ________ a black bag into the river before he ran away.", o: ["(A) to throw", "(B) throw", "(C) threw", "(D) thrown"], a: 0, e: "正解: (A)"},
-                    {q: "14. Don't go out in the heavy rain ________ taking an umbrella.", o: ["(A) with", "(B) except", "(C) without", "(D) besides"], a: 2, e: "正解: (C)"},
-                    {q: "15. A group of children were heard ________ and laughing happily in the playground.", o: ["(A) play", "(B) playing", "(C) played", "(D) to playing"], a: 1, e: "正解: (B)"},
-                    {q: "16. I can never listen to that song ________ remembering my high school days.", o: ["(A) without", "(B) for", "(C) by", "(D) to"], a: 0, e: "正解: (A)"},
-                    {q: "17. The old man was seen ________ the street slowly with a cane.", o: ["(A) cross", "(B) to crossing", "(C) crossing", "(D) crossed"], a: 2, e: "正解: (C)"},
-                    {q: "18. No one can enter the secure facility ________ showing a valid ID card.", o: ["(A) by", "(B) unless", "(C) without", "(D) except"], a: 2, e: "正解: (C)"},
-                    {q: "19. The baby was heard ________ in the middle of the night, waking up the parents.", o: ["(A) to cry", "(B) cry", "(C) crying", "(D) cried"], a: 2, e: "正解: (C)"},
-                    {q: "20. We cannot truly appreciate the light ________ having experienced the dark.", o: ["(A) with", "(B) within", "(C) without", "(D) unless"], a: 2, e: "正解: (C)"},
-                    {q: "21. A bright meteor was seen ________ across the night sky.", o: ["(A) flash", "(B) flashing", "(C) to flashing", "(D) flashed"], a: 0, e: "正解: (A)"},
-                    {q: "22. You shouldn't make important decisions ________ thinking them through carefully.", o: ["(A) outside", "(B) beyond", "(C) without", "(D) beside"], a: 2, e: "正解: (C)"},
-                    {q: "23. The students were heard ________ the math problem loudly in the library.", o: ["(A) discuss", "(B) discussed", "(C) discussing", "(D) to discussing"], a: 2, e: "正解: (C)"},
-                    {q: "24. Never take a sick leave ________ informing your homeroom teacher first.", o: ["(A) without", "(B) unless", "(C) except", "(D) despite"], a: 0, e: "正解: (A)"},
-                    {q: "25. The magician was seen ______ a rabbit out of his hat on the stage.", o: ["(A) pull", "(B) to pull", "(C) pulled", "(D) pulling"], a: 1, e: "正解: (B)"}
+                    {q: "1. A strange man was seen ________ into the house through the back window last night.", o: ["(A) sneak", "(B) sneaked", "(C) to sneak", "(D) was sneaking"], a: 2, e: "正解: (C) 被動語態的感官動詞後，若強調事實過程需將省略的 to 還原，用 to V。"},
+                    {q: "2. He is a very pessimistic person; he never faces a challenge ________ complaining about how hard it is.", o: ["(A) unless", "(B) but", "(C) without", "(D) except"], a: 2, e: "正解: (C) never... without + V-ing (每次...必定...)，介系詞without後接動名詞。"},
+                    {q: "3. The little girl was heard ________ beautifully in her room when I walked past.", o: ["(A) to be sung", "(B) sing", "(C) singing", "(D) sang"], a: 2, e: "正解: (C) 被動語態感官動詞後，若強調「正在進行」的動作，保留 V-ing。"},
+                    {q: "4. When dealing with highly toxic chemicals, scientists cannot be ________ careful.", o: ["(A) very", "(B) much", "(C) too", "(D) over"], a: 2, e: "正解: (C) cannot... too + 形容詞 (再怎麼...也不為過)。"},
+                    {q: "5. There is no one in this company ________ respects the hard-working manager.", o: ["(A) who", "(B) but", "(C) without", "(D) except"], a: 1, e: "正解: (B) no + N + but + V (沒有不...的人)。but 在此相當於 that...not (who doesn't respect)。"},
+                    {q: "6. The thief was caught on camera and was seen ________ the jewelry from the safe.", o: ["(A) stealing", "(B) steal", "(C) stole", "(D) to be stolen"], a: 0, e: "正解: (A) 被動感官動詞後接 V-ing 強調當時正在進行的動作。"},
+                    {q: "7. It never rains in this particular region ________ it pours, causing severe floods.", o: ["(A) unless", "(B) when", "(C) but", "(D) without"], a: 2, e: "正解: (C) never rains but it pours (不下則已，一鳴驚人/屋漏偏逢連夜雨)。but 後面接子句。"},
+                    {q: "8. A responsible student never ________ to hand in assignments on time.", o: ["(A) fails", "(B) stops", "(C) drops", "(D) avoids"], a: 0, e: "正解: (A) never fail to V (一定會... / 從未未能...)。"},
+                    {q: "9. The famous actor was seen ________ coffee at a local café yesterday morning.", o: ["(A) drink", "(B) to be drunk", "(C) drinking", "(D) drank"], a: 2, e: "正解: (C) 被看見正在喝咖啡，用 V-ing。"},
+                    {q: "10. The importance of daily practice in learning a language cannot be ________.", o: ["(A) overemphasized", "(B) overemphasizing", "(C) too emphasize", "(D) overemphasize"], a: 0, e: "正解: (A) cannot be overemphasized (再怎麼強調也不為過)。用被動。"},
+                    {q: "11. The explosion was so loud that it was heard ________ miles away.", o: ["(A) to happen", "(B) happening", "(C) happen", "(D) happened"], a: 0, e: "正解: (A) 聽到某事發生(完整事實)，被動語態須加回 to。"},
+                    {q: "12. I hardly ever listen to this classic song ________ thinking of my childhood friends.", o: ["(A) but", "(B) except", "(C) without", "(D) unless"], a: 2, e: "正解: (C) hardly... without + V-ing (幾乎沒有一次...不...)。"},
+                    {q: "13. The suspect was seen ________ a black bag into the river before he ran away.", o: ["(A) to throw", "(B) throw", "(C) threw", "(D) to be thrown"], a: 0, e: "正解: (A) 強調丟棄的完整動作，被動語態感官動詞後接 to V。"},
+                    {q: "14. Mr. Smith visits his mother at the nursing home every Sunday ________ fail.", o: ["(A) never", "(B) not", "(C) no", "(D) without"], a: 3, e: "正解: (D) without fail (必定 / 毫無例外地)。"},
+                    {q: "15. A group of children were heard ________ and laughing happily in the playground.", o: ["(A) play", "(B) playing", "(C) played", "(D) to be playing"], a: 1, e: "正解: (B) 聽見正在進行的動作，且配合後面的 laughing (V-ing 對稱)。"},
+                    {q: "16. In modern society, it is not ________ for people to change careers multiple times.", o: ["(A) common", "(B) uncommon", "(C) commonly", "(D) uncommonly"], a: 1, e: "正解: (B) not uncommon = 雙重否定表肯定(很常見)。"},
+                    {q: "17. The old man was seen ________ the street slowly with a cane.", o: ["(A) cross", "(B) to be crossed", "(C) crossing", "(D) crossed"], a: 2, e: "正解: (C) 被看見正在過馬路，用 V-ing。"},
+                    {q: "18. I cannot thank you ________ for your generous support during my difficult times.", o: ["(A) much", "(B) a lot", "(C) enough", "(D) over"], a: 2, e: "正解: (C) cannot... enough (再怎麼...也不為過)。"},
+                    {q: "19. The baby was heard ________ in the middle of the night, waking up the parents.", o: ["(A) to cry", "(B) cry", "(C) crying", "(D) to be cried"], a: 2, e: "正解: (C) 聽見正在哭，用 V-ing。"},
+                    {q: "20. There is no rule ________ has some exceptions.", o: ["(A) without", "(B) who", "(C) but", "(D) that"], a: 2, e: "正解: (C) no rule but has... = 凡規則必有例外。but = that doesn't。"},
+                    {q: "21. A bright meteor was seen ________ across the night sky, disappearing in a second.", o: ["(A) to flash", "(B) flashing", "(C) flash", "(D) flashed"], a: 0, e: "正解: (A) 一瞬間發生的完整動作，被動語態後加 to V。(B亦可，但A更強調完整動作，若大考兩者不會同時考，優先選 to V 或 V-ing 中合理的)"},
+                    {q: "22. The patient's condition is critical; the doctors cannot be ________ attentive.", o: ["(A) over", "(B) very", "(C) too", "(D) enough"], a: 2, e: "正解: (C) cannot be too + 形容詞 (再怎麼細心也不為過)。"},
+                    {q: "23. The students were heard ________ the math problem loudly in the library.", o: ["(A) discuss", "(B) discussed", "(C) discussing", "(D) to discussing"], a: 2, e: "正解: (C) 聽見正在討論，用 V-ing。"},
+                    {q: "24. His dedication to teaching ________ be praised too highly.", o: ["(A) must", "(B) should", "(C) cannot", "(D) may"], a: 2, e: "正解: (C) cannot... too highly (再怎麼高估/稱讚也不為過)。"},
+                    {q: "25. The magician was seen ______ a rabbit out of his hat on the stage.", o: ["(A) pull", "(B) to pull", "(C) pulled", "(D) to be pulled"], a: 1, e: "正解: (B) 完整動作被看見，被動語態加 to V。"}
                 ]
             },
             'L6_Grammar': {
-                title: "L6 文法測驗",
+                title: "L6 文法測驗 (加強強調與倒裝陷阱)",
                 questions: [
-                    {q: "1. It was not until the movie ended ________ I realized I had left my phone at home.", o: ["(A) when", "(B) than", "(C) that", "(D) until"], a: 2, e: "正解: (C)"},
-                    {q: "2. Neither the students nor the teacher ________ aware of the sudden change in schedule.", o: ["(A) is", "(B) are", "(C) am", "(D) be"], a: 0, e: "正解: (A)"},
-                    {q: "3. ________ not until 1945 that World War II finally came to an end.", o: ["(A) There was", "(B) This was", "(C) It was", "(D) That was"], a: 2, e: "正解: (C)"},
-                    {q: "4. You can have ________ tea or coffee; it's entirely up to you.", o: ["(A) both", "(B) either", "(C) neither", "(D) not only"], a: 1, e: "正解: (B)"},
-                    {q: "5. It wasn't until she lost her health _____ she started to exercise daily.", o: ["(A) that", "(B) which", "(C) when", "(D) where"], a: 0, e: "正解: (A)"},
-                    {q: "6. Either my brother or my parents ________ going to pick you up at the airport tomorrow.", o: ["(A) is", "(B) are", "(C) am", "(D) be"], a: 1, e: "正解: (B)"},
-                    {q: "7. It was not until the boss entered the room ________ everyone stopped talking.", o: ["(A) then", "(B) when", "(C) that", "(D) before"], a: 2, e: "正解: (C)"},
-                    {q: "8. Neither the manager nor his assistants ________ able to solve the technical issue.", o: ["(A) was", "(B) were", "(C) is", "(D) has"], a: 1, e: "正解: (B)"},
-                    {q: "9. ___ was not until I met him in person that I found out how tall he is.", o: ["(A) It", "(B) He", "(C) That", "(D) There"], a: 0, e: "正解: (A)"},
-                    {q: "10. I want ________ fish nor meat for dinner because I am a vegetarian.", o: ["(A) either", "(B) neither", "(C) both", "(D) some"], a: 1, e: "正解: (B)"},
-                    {q: "11. It wasn't until the sun went down ________ the temperature started to drop significantly.", o: ["(A) when", "(B) that", "(C) which", "(D) where"], a: 1, e: "正解: (B)"},
-                    {q: "12. Either you or I ____ responsible for locking the doors before leaving.", o: ["(A) is", "(B) are", "(C) am", "(D) be"], a: 2, e: "正解: (C)"},
-                    {q: "13. It is not until people fall ill ________ they truly understand the value of health.", o: ["(A) that", "(B) when", "(C) what", "(D) if"], a: 0, e: "正解: (A)"},
-                    {q: "14. ________ Toronto nor Vancouver is the capital of Canada; it is Ottawa.", o: ["(A) Either", "(B) Neither", "(C) Both", "(D) Not only"], a: 1, e: "正解: (B)"},
-                    {q: "15. It wasn't until he apologized sincerely ____ she finally forgave him.", o: ["(A) which", "(B) when", "(C) that", "(D) who"], a: 2, e: "正解: (C)"},
-                    {q: "16. Either the blue shirt or the black pants ________ well with your white jacket.", o: ["(A) go", "(B) goes", "(C) going", "(D) to go"], a: 0, e: "正解: (A)"},
-                    {q: "17. _______ was not until she read the letter that she burst into tears.", o: ["(A) This", "(B) That", "(C) It", "(D) There"], a: 2, e: "正解: (C)"},
-                    {q: "18. Neither the cats nor the dog ___ fed yet; please give them some food.", o: ["(A) has been", "(B) have been", "(C) is", "(D) was"], a: 0, e: "正解: (A)"},
-                    {q: "19. It wasn't until he moved to a foreign country _______ he realized how much he loved his hometown.", o: ["(A) that", "(B) when", "(C) since", "(D) before"], a: 0, e: "正解: (A)"},
-                    {q: "20. You can submit your application ________ in person or via email.", o: ["(A) either", "(B) neither", "(C) both", "(D) whether"], a: 0, e: "正解: (A)"},
-                    {q: "21. It was not until the rain stopped pouring ________ the baseball game could continue.", o: ["(A) what", "(B) when", "(C) that", "(D) than"], a: 2, e: "正解: (C)"},
-                    {q: "22. Neither money nor fame ________ him true happiness in life.", o: ["(A) bring", "(B) brings", "(C) bringing", "(D) to bring"], a: 1, e: "正解: (B)"},
-                    {q: "23. It wasn't until midnight ________ the noisy neighbors finally turned off their music.", o: ["(A) when", "(B) that", "(C) while", "(D) before"], a: 1, e: "正解: (B)"},
-                    {q: "24. Either the coach or the players ________ to attend the press conference later.", o: ["(A) has", "(B) have", "(C) having", "(D) had"], a: 1, e: "正解: (B)"},
-                    {q: "25. ________ was not until I failed the driving test that I started taking it seriously.", o: ["(A) There", "(B) It", "(C) That", "(D) What"], a: 1, e: "正解: (B)"}
+                    {q: "1. It was not until the movie ended ________ I realized I had left my phone at home.", o: ["(A) when", "(B) than", "(C) that", "(D) did"], a: 2, e: "正解: (C) It was not until... that... (強調句型)。不能選 did (倒裝才用)。"},
+                    {q: "2. Neither the students nor the teacher ________ aware of the sudden change in schedule yesterday.", o: ["(A) is", "(B) are", "(C) was", "(D) were"], a: 2, e: "正解: (C) neither A nor B 動詞隨 B (the teacher 單數)，且時間為 yesterday (過去式)。"},
+                    {q: "3. Not until 1945 ________ World War II finally come to an end.", o: ["(A) did", "(B) that", "(C) when", "(D) was"], a: 0, e: "正解: (A) Not until 置於句首，主要子句須倒裝 (did + S + VR)。"},
+                    {q: "4. You can have ________ tea or coffee; it's entirely up to you.", o: ["(A) both", "(B) either", "(C) neither", "(D) not only"], a: 1, e: "正解: (B) either... or... (不是...就是...)。"},
+                    {q: "5. It wasn't until she lost her health _____ she started to exercise daily.", o: ["(A) that", "(B) which", "(C) when", "(D) did"], a: 0, e: "正解: (A) 強調句 It is/was not until... that...。"},
+                    {q: "6. Either my brother or my parents ________ going to pick you up at the airport tomorrow.", o: ["(A) is", "(B) are", "(C) was", "(D) were"], a: 1, e: "正解: (B) Either A or B 動詞隨 B (my parents 複數)，未來式用 are going to。"},
+                    {q: "7. Not until the boss entered the room ________ everyone stop talking.", o: ["(A) that", "(B) when", "(C) did", "(D) had"], a: 2, e: "正解: (C) Not until 句首，主要子句倒裝，且原動詞 stop 為原形，需助動詞 did。"},
+                    {q: "8. Neither the manager nor his assistants ________ able to solve the technical issue right now.", o: ["(A) is", "(B) are", "(C) was", "(D) were"], a: 1, e: "正解: (B) 動詞隨近的主詞 (his assistants 複數)，時間為 right now (現在式)。"},
+                    {q: "9. ___ was not until I met him in person that I found out how tall he is.", o: ["(A) It", "(B) He", "(C) That", "(D) There"], a: 0, e: "正解: (A) 虛主詞 It。"},
+                    {q: "10. I want ________ fish nor meat for dinner because I am a vegetarian.", o: ["(A) either", "(B) neither", "(C) both", "(D) some"], a: 1, e: "正解: (B) neither... nor... (既不...也不...)。"},
+                    {q: "11. It wasn't until the sun went down ________ the temperature started to drop significantly.", o: ["(A) when", "(B) that", "(C) did", "(D) where"], a: 1, e: "正解: (B) 強調句型 It was not until... that...。"},
+                    {q: "12. Either you or I ____ responsible for locking the doors before leaving every day.", o: ["(A) is", "(B) are", "(C) am", "(D) be"], a: 2, e: "正解: (C) Either A or B 動詞隨 B (I)，故用 am。"},
+                    {q: "13. Not until people fall ill ________ they truly understand the value of health.", o: ["(A) that", "(B) do", "(C) did", "(D) when"], a: 1, e: "正解: (B) Not until 句首，主要子句倒裝，現在式事實用 do + they + understand。"},
+                    {q: "14. ________ Toronto nor Vancouver is the capital of Canada; it is Ottawa.", o: ["(A) Either", "(B) Neither", "(C) Both", "(D) Not only"], a: 1, e: "正解: (B) 搭配 nor 只能用 Neither。"},
+                    {q: "15. It wasn't until he apologized sincerely ____ she finally forgave him.", o: ["(A) which", "(B) when", "(C) that", "(D) who"], a: 2, e: "正解: (C) 強調句 that。"},
+                    {q: "16. Either the blue shirt or the black pants ________ well with your white jacket.", o: ["(A) go", "(B) goes", "(C) going", "(D) is going"], a: 0, e: "正解: (A) 動詞隨 pants (複數)，故用原形動詞 go。"},
+                    {q: "17. _______ was not until she read the letter that she burst into tears.", o: ["(A) This", "(B) That", "(C) It", "(D) There"], a: 2, e: "正解: (C) 強調句虛主詞 It。"},
+                    {q: "18. Neither the cats nor the dog ___ fed yet; please give them some food.", o: ["(A) has been", "(B) have been", "(C) is", "(D) are"], a: 0, e: "正解: (A) 動詞隨 the dog (單數)，且有 yet 表示現在完成式，故用 has been。"},
+                    {q: "19. Not until he moved to a foreign country _______ he realize how much he loved his hometown.", o: ["(A) that", "(B) when", "(C) did", "(D) had"], a: 2, e: "正解: (C) Not until 句首，主要子句倒裝，過去式用 did + S + VR。"},
+                    {q: "20. You can submit your application ________ in person or via email.", o: ["(A) either", "(B) neither", "(C) both", "(D) whether"], a: 0, e: "正解: (A) 搭配 or 用 either。"},
+                    {q: "21. It was not until the rain stopped pouring ________ the baseball game could continue.", o: ["(A) what", "(B) when", "(C) that", "(D) than"], a: 2, e: "正解: (C) 強調句 that。"},
+                    {q: "22. Neither money nor fame ________ him true happiness in his life so far.", o: ["(A) bring", "(B) brings", "(C) has brought", "(D) have brought"], a: 2, e: "正解: (C) 動詞隨 fame (不可數單數)，且 so far 表現在完成式，用 has brought。"},
+                    {q: "23. Not until midnight ________ the noisy neighbors finally turn off their music.", o: ["(A) when", "(B) that", "(C) do", "(D) did"], a: 3, e: "正解: (D) Not until 句首，倒裝，過去式用 did。"},
+                    {q: "24. Either the coach or the players ________ to attend the press conference later today.", o: ["(A) has", "(B) have", "(C) is", "(D) are"], a: 1, e: "正解: (B) 動詞隨 players (複數)，表示必須(have to)。"},
+                    {q: "25. ________ was not until I failed the driving test that I started taking it seriously.", o: ["(A) There", "(B) It", "(C) That", "(D) What"], a: 1, e: "正解: (B) 強調句虛主詞 It。"}
                 ]
             },
             'L4_Vocab': {
@@ -379,7 +414,7 @@ The main feature of the __24__ is a dance called the Bon Odori. This dance provi
                     {q:"14. Kevin would rather relax by the beach all day than _______ to fit in many different activities.", o:["(A) trying", "(B) to try", "(C) try", "(D) tried"], a:2, e:"would rather VR than VR"},
                     {q:"15. Halfway through the book, I discovered _______ was not the text that my teacher had assigned.", o:["(A) which", "(B) what", "(C) that", "(D) the way"], a:2, e:"that 引導名詞子句當受詞"},
                     {p: EX4_TXT, q: "(16) 請問應填入？", o: ["(A) reunited", "(B) anticipated", "(C) recognized", "(D) awaited"], a: 2, e: "recognize (認出)"},
-                    {p: EX4_TXT, q: "(17) 請問應填入？", o: ["(A) x", "(B) them", "(C) these", "(D) those"], a: 3, e: "those (指那些人)"},
+                    {p: EX4_TXT, q: "(17) 請問應填入？", o: ["(A) them", "(B) these", "(C) those", "(D) they"], a: 2, e: "those (指那些人)"},
                     {p: EX4_TXT, q: "(18) 請問應填入？", o: ["(A) Otherwise", "(B) Instead", "(C) Then", "(D) Likewise"], a: 1, e: "Instead (反而)"},
                     {p: EX4_TXT, q: "(19) 請問應填入？", o: ["(A) to be", "(B) to have been", "(C) being", "(D) that is"], a: 0, e: "to be"},
                     {p: EX4_TXT, q: "(20) 請問應填入？", o: ["(A) mapping out", "(B) heading to", "(C) falling victim to", "(D) feeding on"], a: 1, e: "heading to (前往)"}
@@ -392,7 +427,7 @@ The main feature of the __24__ is a dance called the Bon Odori. This dance provi
                     {q:"2. The mother left the nursery with soft and _______ steps.", o:["(A) desperate", "(B) delicate", "(C) deliberate", "(D) desperate"], a:2, e:"deliberate (小心的)"},
                     {q:"3. At night, the city _______ looked beautiful.", o:["(A) landmark", "(B) landlord", "(C) landscape", "(D) landslide"], a:2, e:"landscape (風景)"},
                     {q:"4. London, the _______ of the UK, is the political center.", o:["(A) captain", "(B) campus", "(C) capsule", "(D) capital"], a:3, e:"capital (首都)"},
-                    {q:"5. A porter stood at the main _______ of the hotel.", o:["(A) entrance", "(B) envelope", "(C) enterprise", "(D) entertainment"], a:0, e:"entrance (入口)"},
+                    {q:"5. A porter stood at the main _______ of the hotel.", o:["(A) entrance", "(B) entrance", "(C) enterprise", "(D) entertainment"], a:0, e:"entrance (入口)"},
                     {q:"6. There is no need to hurry. We've got plenty of time for a _______ lunch.", o:["(A) lengthy", "(B) leisurely", "(C) liability", "(D) literal"], a:1, e:"leisurely (悠閒的)"},
                     {q:"7. It took the train two hours longer to reach its _______.", o:["(A) description", "(B) destination", "(C) destruction", "(D) determination"], a:1, e:"destination (目的地)"},
                     {q:"8. The writer has become a household name because of her _______ achievements.", o:["(A) literal", "(B) literary", "(C) liberal", "(D) liberated"], a:1, e:"literary (文學的)"},
@@ -438,99 +473,89 @@ The main feature of the __24__ is a dance called the Bon Odori. This dance provi
             'L4_Cloze': {
                 title: "L4 文意選填",
                 questions: [
-                    {p: CL4_1, q: "(1) 請問第一格應填？", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 3, e: "accompany"},
-                    {p: CL4_1, q: "(2) 請問第二格應填？", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 5, e: "essential"},
-                    {p: CL4_1, q: "(3) 請問第三格應填？", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 1, e: "concept"},
-                    {p: CL4_1, q: "(4) 請問第四格應填？", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 6, e: "mourn"},
-                    {p: CL4_1, q: "(5) 請問第五格應填？", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 2, e: "sorrow"},
-                    {p: CL4_1, q: "(6) 請問第六格應填？", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 7, e: "joyous"},
-                    {p: CL4_1, q: "(7) 請問第七格應填？", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 0, e: "occasion"},
-                    {p: CL4_1, q: "(8) 請問第八格應填？", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 4, e: "reunion"},
-                    {p: CL4_2, q: "(1) 請問第一格應填？", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 5, e: "anticipate"},
-                    {p: CL4_2, q: "(2) 請問第二格應填？", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 2, e: "arrival"},
-                    {p: CL4_2, q: "(3) 請問第三格應填？", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 4, e: "preference"},
-                    {p: CL4_2, q: "(4) 請問第四格應填？", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 1, e: "reception"},
-                    {p: CL4_2, q: "(5) 請問第五格應填？", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 7, e: "decorate"},
-                    {p: CL4_2, q: "(6) 請問第六格應填？", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 6, e: "feast"},
-                    {p: CL4_2, q: "(7) 請問第七格應填？", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 0, e: "dawn"},
-                    {p: CL4_2, q: "(8) 請問第八格應填？", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 3, e: "transforming"},
-                    {p: CL4_3, q: "(1) 請問第一格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 8, e: "resemble"},
-                    {p: CL4_3, q: "(2) 請問第二格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 7, e: "participate"},
-                    {p: CL4_3, q: "(3) 請問第三格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 4, e: "mocking"},
-                    {p: CL4_3, q: "(4) 請問第四格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 1, e: "recognizing"},
-                    {p: CL4_3, q: "(5) 請問第五格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 5, e: "inevitable"},
-                    {p: CL4_3, q: "(6) 請問第六格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 3, e: "cycle"},
-                    {p: CL4_3, q: "(7) 請問第七格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 2, e: "annual"},
-                    {p: CL4_3, q: "(8) 請問第八格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 6, e: "awaits"},
-                    {p: CL4_3, q: "(9) 請問第九格應填？", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 0, e: "escape"},
-                    {p: CL4_4, q: "(21) 請問第 21 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 7, e: "sorrowful (悲傷的)"},
-                    {p: CL4_4, q: "(22) 請問第 22 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 3, e: "joyous (快樂的)"},
-                    {p: CL4_4, q: "(23) 請問第 23 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 4, e: "in honor of (向...致敬)"},
-                    {p: CL4_4, q: "(24) 請問第 24 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 8, e: "occasion (場合)"},
-                    {p: CL4_4, q: "(25) 請問第 25 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 6, e: "reception for (為...舉辦的接待)"},
-                    {p: CL4_4, q: "(26) 請問第 26 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 0, e: "throughout Japan (全日本)"},
-                    {p: CL4_4, q: "(27) 請問第 27 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 2, e: "resemble (像)"},
-                    {p: CL4_4, q: "(28) 請問第 28 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 9, e: "essential (基本的)"},
-                    {p: CL4_4, q: "(29) 請問第 29 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 1, e: "dress up in"},
-                    {p: CL4_4, q: "(30) 請問第 30 格應選？", o: ["(A) throughout", "(B) in", "(C) resemble", "(D) joyous", "(E) honor", "(F) accompany", "(G) for", "(H) sorrowful", "(I) occasion", "(J) essential"], a: 5, e: "accompany (陪伴)"}
+                    {p: CL4_1, q: "(1) 第一格", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 3, e: "accompany"},
+                    {p: CL4_1, q: "(2) 第二格", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 5, e: "essential"},
+                    {p: CL4_1, q: "(3) 第三格", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 1, e: "concept"},
+                    {p: CL4_1, q: "(4) 第四格", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 6, e: "mourn"},
+                    {p: CL4_1, q: "(5) 第五格", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 2, e: "sorrow"},
+                    {p: CL4_1, q: "(6) 第六格", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 7, e: "joyous"},
+                    {p: CL4_1, q: "(7) 第七格", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 0, e: "occasion"},
+                    {p: CL4_1, q: "(8) 第八格", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 4, e: "reunion"},
+                    {p: CL4_2, q: "(1) 第一格", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 5, e: "anticipate"},
+                    {p: CL4_2, q: "(2) 第二格", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 2, e: "arrival"},
+                    {p: CL4_2, q: "(3) 第三格", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 4, e: "preference"},
+                    {p: CL4_2, q: "(4) 第四格", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 1, e: "reception"},
+                    {p: CL4_2, q: "(5) 第五格", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 7, e: "decorate"},
+                    {p: CL4_2, q: "(6) 第六格", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 6, e: "feast"},
+                    {p: CL4_2, q: "(7) 第七格", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 0, e: "dawn"},
+                    {p: CL4_2, q: "(8) 第八格", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 3, e: "transforming"},
+                    {p: CL4_3, q: "(1) 第一格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 8, e: "resemble"},
+                    {p: CL4_3, q: "(2) 第二格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 7, e: "participate"},
+                    {p: CL4_3, q: "(3) 第三格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 4, e: "mocking"},
+                    {p: CL4_3, q: "(4) 第四格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 1, e: "recognizing"},
+                    {p: CL4_3, q: "(5) 第五格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 5, e: "inevitable"},
+                    {p: CL4_3, q: "(6) 第六格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 3, e: "cycle"},
+                    {p: CL4_3, q: "(7) 第七格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 2, e: "annual"},
+                    {p: CL4_3, q: "(8) 第八格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 6, e: "awaits"},
+                    {p: CL4_3, q: "(9) 第九格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 0, e: "escape"}
                 ]
             },
             'L5_Cloze': {
                 title: "L5 文意選填",
                 questions: [
-                    {p: "【單字庫】(A) capital (B) rustling (C) boasts (D) blossoms (E) previously (F) landscape (G) historic (H) splendor\nIn spring, romance is in the air as the city is filled with a sea of pink cherry (1) ________. In summer, green leaves can be heard (2) ________ in the wind and seen sparkling in the sunshine. Maple leaves in autumn set the (3) ________ on fire with orange and red colors. ... Apart from its natural (4) ________, Kyoto has so much more to feast one's eyes on. Having (5) ________ been the (6) ________ of Japan for over a thousand years, the city (7) ________ a large number of (8) ________ shrines and temples.", q: "(1) 第一格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 3, e: "blossoms"},
-                    {p: "同上", q: "(2) 第二格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 1, e: "rustling"},
-                    {p: "同上", q: "(3) 第三格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 5, e: "landscape"},
-                    {p: "同上", q: "(4) 第四格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 7, e: "splendor"},
-                    {p: "同上", q: "(5) 第五格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 4, e: "previously"},
-                    {p: "同上", q: "(6) 第六格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 0, e: "capital"},
-                    {p: "同上", q: "(7) 第七格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 2, e: "boasts"},
-                    {p: "同上", q: "(8) 第八格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 6, e: "historic"},
+                    {p: CL5_1, q: "(1) 第一格", o: ["(A) capital", "(B) rustling", "(C) boasts", "(D) blossoms", "(E) previously", "(F) landscape", "(G) historic", "(H) splendor"], a: 3, e: "blossoms"},
+                    {p: CL5_1, q: "(2) 第二格", o: ["(A) capital", "(B) rustling", "(C) boasts", "(D) blossoms", "(E) previously", "(F) landscape", "(G) historic", "(H) splendor"], a: 1, e: "rustling"},
+                    {p: CL5_1, q: "(3) 第三格", o: ["(A) capital", "(B) rustling", "(C) boasts", "(D) blossoms", "(E) previously", "(F) landscape", "(G) historic", "(H) splendor"], a: 5, e: "landscape"},
+                    {p: CL5_1, q: "(4) 第四格", o: ["(A) capital", "(B) rustling", "(C) boasts", "(D) blossoms", "(E) previously", "(F) landscape", "(G) historic", "(H) splendor"], a: 7, e: "splendor"},
+                    {p: CL5_1, q: "(5) 第五格", o: ["(A) capital", "(B) rustling", "(C) boasts", "(D) blossoms", "(E) previously", "(F) landscape", "(G) historic", "(H) splendor"], a: 4, e: "previously"},
+                    {p: CL5_1, q: "(6) 第六格", o: ["(A) capital", "(B) rustling", "(C) boasts", "(D) blossoms", "(E) previously", "(F) landscape", "(G) historic", "(H) splendor"], a: 0, e: "capital"},
+                    {p: CL5_1, q: "(7) 第七格", o: ["(A) capital", "(B) rustling", "(C) boasts", "(D) blossoms", "(E) previously", "(F) landscape", "(G) historic", "(H) splendor"], a: 2, e: "boasts"},
+                    {p: CL5_1, q: "(8) 第八格", o: ["(A) capital", "(B) rustling", "(C) boasts", "(D) blossoms", "(E) previously", "(F) landscape", "(G) historic", "(H) splendor"], a: 6, e: "historic"},
                     
-                    {p: "【單字庫】(A) breathtaking (B) stunning (C) magnificent (D) leisurely (E) entrance\nWith giant, leafy maple trees leading up to its main (1) ________, what comes into view is this (2) ________ three-story pavilion. Rising up behind a crystal-clear pond... The reflection of the pavilion on the glassy surface of the pond is a (3) ________ sight. Visitors can take a (4) ________ walk through the surrounding gardens and enjoy many (5) ________ views of this beautiful structure.", q: "(1) 第一格", o: ["(A)","(B)","(C)","(D)","(E)"], a: 4, e: "entrance"},
-                    {p: "同上", q: "(2) 第二格", o: ["(A)","(B)","(C)","(D)","(E)"], a: 2, e: "magnificent"},
-                    {p: "同上", q: "(3) 第三格", o: ["(A)","(B)","(C)","(D)","(E)"], a: 1, e: "stunning"},
-                    {p: "同上", q: "(4) 第四格", o: ["(A)","(B)","(C)","(D)","(E)"], a: 3, e: "leisurely"},
-                    {p: "同上", q: "(5) 第五格", o: ["(A)","(B)","(C)","(D)","(E)"], a: 0, e: "breathtaking"},
+                    {p: CL5_2, q: "(1) 第一格", o: ["(A) breathtaking", "(B) stunning", "(C) magnificent", "(D) leisurely", "(E) entrance"], a: 4, e: "entrance"},
+                    {p: CL5_2, q: "(2) 第二格", o: ["(A) breathtaking", "(B) stunning", "(C) magnificent", "(D) leisurely", "(E) entrance"], a: 2, e: "magnificent"},
+                    {p: CL5_2, q: "(3) 第三格", o: ["(A) breathtaking", "(B) stunning", "(C) magnificent", "(D) leisurely", "(E) entrance"], a: 1, e: "stunning"},
+                    {p: CL5_2, q: "(4) 第四格", o: ["(A) breathtaking", "(B) stunning", "(C) magnificent", "(D) leisurely", "(E) entrance"], a: 3, e: "leisurely"},
+                    {p: CL5_2, q: "(5) 第五格", o: ["(A) breathtaking", "(B) stunning", "(C) magnificent", "(D) leisurely", "(E) entrance"], a: 0, e: "breathtaking"},
                     
-                    {p: "【單字庫】(A) appearance (B) deliberate (C) distinctive (D) destination (E) elegant (F) delicate (G) literature\nAnother unforgettable Kyoto sight involves coming face to face with one of the old capital's very special \"persons of art,\" or geishas. These are women dressed in (1) ________ kimonos with silk sleeves. Their (2) ________ white makeup, bright red lipstick, and (3) ________ hairpins also make them easy to recognize. And it's not just their unique (4) ________ that makes geishas stand out from the crowd. These highly skilled entertainers spend years mastering different musical instruments, songs, and (5) ________. Of course, no \"person of art\" could be a true geisha without being able to perform the traditional kyomai dance. This ancient art combines slow music with very (6) ________ movements and often expresses very deep emotion. ... Regardless of the season, the city is a must-see (7) ________ for tourists seeking an authentic local experience.", q: "(1) 第一格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 4, e: "elegant"},
-                    {p: "同上", q: "(2) 第二格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 2, e: "distinctive"},
-                    {p: "同上", q: "(3) 第三格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 5, e: "delicate"},
-                    {p: "同上", q: "(4) 第四格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 0, e: "appearance"},
-                    {p: "同上", q: "(5) 第五格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 6, e: "literature"},
-                    {p: "同上", q: "(6) 第六格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 1, e: "deliberate"},
-                    {p: "同上", q: "(7) 第七格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 3, e: "destination"}
+                    {p: CL5_3, q: "(1) 第一格", o: ["(A) appearance", "(B) deliberate", "(C) distinctive", "(D) destination", "(E) elegant", "(F) delicate", "(G) literature"], a: 4, e: "elegant"},
+                    {p: CL5_3, q: "(2) 第二格", o: ["(A) appearance", "(B) deliberate", "(C) distinctive", "(D) destination", "(E) elegant", "(F) delicate", "(G) literature"], a: 2, e: "distinctive"},
+                    {p: CL5_3, q: "(3) 第三格", o: ["(A) appearance", "(B) deliberate", "(C) distinctive", "(D) destination", "(E) elegant", "(F) delicate", "(G) literature"], a: 5, e: "delicate"},
+                    {p: CL5_3, q: "(4) 第四格", o: ["(A) appearance", "(B) deliberate", "(C) distinctive", "(D) destination", "(E) elegant", "(F) delicate", "(G) literature"], a: 0, e: "appearance"},
+                    {p: CL5_3, q: "(5) 第五格", o: ["(A) appearance", "(B) deliberate", "(C) distinctive", "(D) destination", "(E) elegant", "(F) delicate", "(G) literature"], a: 6, e: "literature"},
+                    {p: CL5_3, q: "(6) 第六格", o: ["(A) appearance", "(B) deliberate", "(C) distinctive", "(D) destination", "(E) elegant", "(F) delicate", "(G) literature"], a: 1, e: "deliberate"},
+                    {p: CL5_3, q: "(7) 第七格", o: ["(A) appearance", "(B) deliberate", "(C) distinctive", "(D) destination", "(E) elegant", "(F) delicate", "(G) literature"], a: 3, e: "destination"}
                 ]
             },
             'L6_Cloze': {
                 title: "L6 文意選填",
                 questions: [
-                    {p: "【單字庫】(A) paths (B) bruised (C) navigate (D) intimately (E) tumbling (F) crops (G) superior (H) skillfully (I) slope\nNuñez slid down a snowy (1) ________ and fell over a cliff edge, (2) ________ a great distance. (3) ________ and dazed... Feeling (4) ________ to these sightless people... They knew their mountain kingdom (5) ________. The villagers (6) ________ farmed... effective techniques for growing (7) ________. The (8) ________ helped them (9) ________ safely.", q: "(1) 第一格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 8, e: "slope"},
-                    {p: "同上", q: "(2) 第二格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 4, e: "tumbling"},
-                    {p: "同上", q: "(3) 第三格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 1, e: "bruised"},
-                    {p: "同上", q: "(4) 第四格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 6, e: "superior"},
-                    {p: "同上", q: "(5) 第五格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 3, e: "intimately"},
-                    {p: "同上", q: "(6) 第六格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 7, e: "skillfully"},
-                    {p: "同上", q: "(7) 第七格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 5, e: "crops"},
-                    {p: "同上", q: "(8) 第八格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 0, e: "paths"},
-                    {p: "同上", q: "(9) 第九格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)","(I)"], a: 2, e: "navigate"},
+                    {p: CL6_1, q: "(1) 第一格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 8, e: "slope"},
+                    {p: CL6_1, q: "(2) 第二格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 4, e: "tumbling"},
+                    {p: CL6_1, q: "(3) 第三格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 1, e: "bruised"},
+                    {p: CL6_1, q: "(4) 第四格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 6, e: "superior"},
+                    {p: CL6_1, q: "(5) 第五格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 3, e: "intimately"},
+                    {p: CL6_1, q: "(6) 第六格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 7, e: "skillfully"},
+                    {p: CL6_1, q: "(7) 第七格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 5, e: "crops"},
+                    {p: CL6_1, q: "(8) 第八格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 0, e: "paths"},
+                    {p: CL6_1, q: "(9) 第九格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 2, e: "navigate"},
                     
-                    {p: "【單字庫】(A) pitied (B) adapted (C) smoothness (D) awe (E) outsider (F) twinkling (G) clung\nYacob put the (1) ________ to work. Nuñez (2) ________ to their way of life, but he (3) ________ to the reality of sight. The more he spoke of (4) ________ stars, the more they (5) ________ him. Lack of (6) ________. She lacked the (7) ________ the villagers valued.", q: "(1) 第一格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 4, e: "outsider"},
-                    {p: "同上", q: "(2) 第二格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 1, e: "adapted"},
-                    {p: "同上", q: "(3) 第三格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 6, e: "clung"},
-                    {p: "同上", q: "(4) 第四格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 5, e: "twinkling"},
-                    {p: "同上", q: "(5) 第五格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 0, e: "pitied"},
-                    {p: "同上", q: "(6) 第六格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 3, e: "awe"},
-                    {p: "同上", q: "(7) 第七格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)"], a: 2, e: "smoothness"},
+                    {p: CL6_2, q: "(1) 第一格", o: ["(A) pitied", "(B) adapted", "(C) smoothness", "(D) awe", "(E) outsider", "(F) twinkling", "(G) clung"], a: 4, e: "outsider"},
+                    {p: CL6_2, q: "(2) 第二格", o: ["(A) pitied", "(B) adapted", "(C) smoothness", "(D) awe", "(E) outsider", "(F) twinkling", "(G) clung"], a: 1, e: "adapted"},
+                    {p: CL6_2, q: "(3) 第三格", o: ["(A) pitied", "(B) adapted", "(C) smoothness", "(D) awe", "(E) outsider", "(F) twinkling", "(G) clung"], a: 6, e: "clung"},
+                    {p: CL6_2, q: "(4) 第四格", o: ["(A) pitied", "(B) adapted", "(C) smoothness", "(D) awe", "(E) outsider", "(F) twinkling", "(G) clung"], a: 5, e: "twinkling"},
+                    {p: CL6_2, q: "(5) 第五格", o: ["(A) pitied", "(B) adapted", "(C) smoothness", "(D) awe", "(E) outsider", "(F) twinkling", "(G) clung"], a: 0, e: "pitied"},
+                    {p: CL6_2, q: "(6) 第六格", o: ["(A) pitied", "(B) adapted", "(C) smoothness", "(D) awe", "(E) outsider", "(F) twinkling", "(G) clung"], a: 3, e: "awe"},
+                    {p: CL6_2, q: "(7) 第七格", o: ["(A) pitied", "(B) adapted", "(C) smoothness", "(D) awe", "(E) outsider", "(F) twinkling", "(G) clung"], a: 2, e: "smoothness"},
                     
-                    {p: "【單字庫】(A) peculiar (B) gazing (C) confronted (D) fled (E) opposition (F) envisioning (G) Nevertheless (H) dilemma\nDesire to marry faced (1) ________. Remove the (2) ________ orbs. Nuñez was (3) ________ with a (4) ________. (5) ________, it wasn't until the day of his surgery... (6) ________ at the landscape and (7) ________ all he might see... he (8) ________ the country.", q: "(1) 第一格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 4, e: "opposition"},
-                    {p: "同上", q: "(2) 第二格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 0, e: "peculiar"},
-                    {p: "同上", q: "(3) 第三格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 2, e: "confronted"},
-                    {p: "同上", q: "(4) 第四格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 7, e: "dilemma"},
-                    {p: "同上", q: "(5) 第五格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 6, e: "Nevertheless"},
-                    {p: "同上", q: "(6) 第六格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 1, e: "gazing"},
-                    {p: "同上", q: "(7) 第七格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 5, e: "envisioning"},
-                    {p: "同上", q: "(8) 第八格", o: ["(A)","(B)","(C)","(D)","(E)","(F)","(G)","(H)"], a: 3, e: "fled"}
+                    {p: CL6_3, q: "(1) 第一格", o: ["(A) peculiar", "(B) gazing", "(C) confronted", "(D) fled", "(E) opposition", "(F) envisioning", "(G) Nevertheless", "(H) dilemma"], a: 4, e: "opposition"},
+                    {p: CL6_3, q: "(2) 第二格", o: ["(A) peculiar", "(B) gazing", "(C) confronted", "(D) fled", "(E) opposition", "(F) envisioning", "(G) Nevertheless", "(H) dilemma"], a: 0, e: "peculiar"},
+                    {p: CL6_3, q: "(3) 第三格", o: ["(A) peculiar", "(B) gazing", "(C) confronted", "(D) fled", "(E) opposition", "(F) envisioning", "(G) Nevertheless", "(H) dilemma"], a: 2, e: "confronted"},
+                    {p: CL6_3, q: "(4) 第四格", o: ["(A) peculiar", "(B) gazing", "(C) confronted", "(D) fled", "(E) opposition", "(F) envisioning", "(G) Nevertheless", "(H) dilemma"], a: 7, e: "dilemma"},
+                    {p: CL6_3, q: "(5) 第五格", o: ["(A) peculiar", "(B) gazing", "(C) confronted", "(D) fled", "(E) opposition", "(F) envisioning", "(G) Nevertheless", "(H) dilemma"], a: 6, e: "Nevertheless"},
+                    {p: CL6_3, q: "(6) 第六格", o: ["(A) peculiar", "(B) gazing", "(C) confronted", "(D) fled", "(E) opposition", "(F) envisioning", "(G) Nevertheless", "(H) dilemma"], a: 1, e: "gazing"},
+                    {p: CL6_3, q: "(7) 第七格", o: ["(A) peculiar", "(B) gazing", "(C) confronted", "(D) fled", "(E) opposition", "(F) envisioning", "(G) Nevertheless", "(H) dilemma"], a: 5, e: "envisioning"},
+                    {p: CL6_3, q: "(8) 第八格", o: ["(A) peculiar", "(B) gazing", "(C) confronted", "(D) fled", "(E) opposition", "(F) envisioning", "(G) Nevertheless", "(H) dilemma"], a: 3, e: "fled"}
                 ]
             }
         };
@@ -556,7 +581,10 @@ The main feature of the __24__ is a dance called the Bon Odori. This dance provi
         window.closeWarningModal = () => document.getElementById('modal-warning').classList.add('hidden');
 
         function switchView(id) {
-            ['view-login', 'view-dashboard', 'view-quiz', 'view-records', 'view-teacher-dashboard'].forEach(v => document.getElementById(v).classList.add('hidden'));
+            ['view-login', 'view-dashboard', 'view-quiz', 'view-records', 'view-teacher-dashboard', 'view-mistakes'].forEach(v => {
+                const el = document.getElementById(v);
+                if(el) el.classList.add('hidden');
+            });
             document.getElementById(id).classList.remove('hidden');
             window.scrollTo(0,0);
         }
@@ -750,6 +778,59 @@ The main feature of the __24__ is a dance called the Bon Odori. This dance provi
         window.closeTeacherAuthModal = () => document.getElementById('modal-teacher-auth').classList.add('hidden');
         window.verifyTeacherPasscode = () => { if(document.getElementById('teacher-passcode').value === 'teacher123') { closeTeacherAuthModal(); openTeacherDashboard(); } else alert("身分驗證失敗！"); };
         window.exitTeacherDashboard = () => switchView(currentStudentName ? 'view-dashboard' : 'view-login');
+
+        window.showMistakes = function() {
+            switchView('view-mistakes');
+            const container = document.getElementById('mistakes-container');
+            container.innerHTML = '';
+            
+            let hist = JSON.parse(localStorage.getItem(`hist_${currentStudentName}`) || '[]');
+            let mistakeMap = {};
+            
+            hist.forEach(rec => {
+                if(rec.answers) {
+                    rec.answers.forEach(ans => {
+                        if (ans.isCorrect === false && ans.questionText) {
+                            if (!mistakeMap[ans.questionText]) {
+                                mistakeMap[ans.questionText] = {
+                                    q: ans.questionText,
+                                    correctAnswer: ans.correctAnswer,
+                                    explanation: ans.explanation,
+                                    count: 1, 
+                                    lastUserAnswer: ans.userAnswer
+                                };
+                            } else {
+                                mistakeMap[ans.questionText].count++;
+                                mistakeMap[ans.questionText].lastUserAnswer = ans.userAnswer;
+                            }
+                        }
+                    });
+                }
+            });
+
+            const mistakes = Object.values(mistakeMap).sort((a, b) => b.count - a.count);
+
+            if(mistakes.length === 0) {
+                document.getElementById('no-mistakes-msg').classList.remove('hidden');
+            } else {
+                document.getElementById('no-mistakes-msg').classList.add('hidden');
+                mistakes.forEach((m, idx) => {
+                    container.innerHTML += `
+                        <div class="bg-red-50 border border-red-200 rounded-xl p-5 relative shadow-sm">
+                            <span class="absolute top-4 right-4 ${m.count > 1 ? 'bg-red-600 text-white' : 'bg-red-100 text-red-800'} text-xs font-bold px-2.5 py-1 rounded-full">
+                                錯過 ${m.count} 次
+                            </span>
+                            <h4 class="font-bold text-gray-800 mb-3 pr-20 text-lg leading-relaxed">${idx + 1}. ${m.q}</h4>
+                            <div class="text-sm text-gray-700 bg-white bg-opacity-70 p-4 rounded-lg border border-red-100 space-y-2">
+                                <p><span class="font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded mr-1">上次作答</span> ${m.lastUserAnswer || '(未作答)'}</p>
+                                <p><span class="font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded mr-1">正確答案</span> ${m.correctAnswer}</p>
+                                <p class="text-gray-600 mt-2 font-medium border-t border-red-100 pt-2"><span class="text-blue-700">💡 詳解：</span>${m.explanation || '無'}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
 
         function openTeacherDashboard() {
             switchView('view-teacher-dashboard'); if(!db) return;
