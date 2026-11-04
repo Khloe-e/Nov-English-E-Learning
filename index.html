@@ -36,10 +36,10 @@
         <div id="view-login" class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full fade-in border border-gray-100">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-800">學生登入驗證</h2>
-                <p class="text-sm text-gray-500 mt-2">請輸入真實姓名。系統即時雲端同步進度防斷線。</p>
+                <p class="text-sm text-gray-500 mt-2">請輸入真實姓名。系統將自動從雲端同步您的專屬進度與錯題本。</p>
             </div>
             <div class="space-y-4">
-                <input type="text" id="student-name" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="例如：蔣安安">
+                <input type="text" id="student-name" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="例如：王小明 (需與先前輸入完全相同)">
                 <button id="btn-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md">進入測驗系統</button>
             </div>
         </div>
@@ -101,11 +101,10 @@
                 
                 <div id="options-container" class="space-y-3 mb-6"></div>
                 
-<div id="text-input-container" class="hidden mb-6">
+                <div id="text-input-container" class="hidden mb-6">
                     <div class="bg-gray-50 p-4 rounded-xl border mb-4">
                         <div class="flex justify-between items-center mb-2">
-                            <label class="block text-sm font-semibold">請輸入完整單字 (防呆與自動校正已關閉)：</label>
-                            <!-- 這是新增的發音按鈕 -->
+                            <label class="block text-sm font-semibold text-gray-700">請輸入完整單字 (防呆與自動校正已關閉)：</label>
                             <button id="btn-play-audio" class="text-blue-700 hover:text-blue-900 bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-full text-sm font-bold flex items-center transition shadow-sm">
                                 🔊 聽發音
                             </button>
@@ -117,6 +116,16 @@
                     </div>
                     <button id="btn-submit-text" onclick="submitTextAnswer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg">確認提交</button>
                 </div>
+
+                <div id="quiz-feedback" class="hidden mb-6 p-4 rounded-xl"></div>
+
+                <div class="flex justify-between items-center border-t pt-4">
+                    <button onclick="showDashboard()" class="text-gray-500 text-sm font-medium">暫停並返回選單</button>
+                    <button id="btn-next-question" class="hidden bg-blue-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-md">下一題 &rarr;</button>
+                    <button id="btn-finish-quiz" class="hidden bg-green-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-md">完成測驗</button>
+                </div>
+            </div>
+        </div>
 
         <div id="view-records" class="hidden w-full max-w-4xl fade-in my-6">
             <div class="bg-white rounded-2xl shadow-lg p-6">
@@ -219,8 +228,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, addDoc, doc, setDoc, getDoc, deleteDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, getDoc, deleteDoc, updateDoc, onSnapshot, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCauX-RRzjdPJntpZULukLwa4D12SY6k0E", authDomain: "november-senior-english-e-l.firebaseapp.com",
@@ -228,16 +237,10 @@
             messagingSenderId: "661992781814", appId: "1:661992781814:web:b788a3194ca3c5cadab9d7"
         };
 
-        const EX4_TXT = `In early October, I received something special in the mail. It was a postcard with my name and address written on it, and it came all the way from Merida, Mexico. I ___16___ the handwriting right away because it belonged to my good friend Pedro. He invited me to join him for the Day of the Dead, a major annual Mexican festival to remember ___17___ who are no longer with us.
-Mexicans do not fear death. ___18___, they have embraced and celebrated this fact of life for centuries with street parades, all-night parties, and special dishes like pibipollo. This, by the way, is chicken wrapped and steamed in banana leaves and is believed ___19___ just as popular among the dead as among the living! Of course, I was dying to see all of this in person, so just three weeks later I was on a plane ___20___ Mexico. Needless to say, I had my scary costume packed!`;
-        const EX5_TXT = `Dear Allie, Your mom said you are planning a trip to Japan and asked me to email you about our trip last year. We had a great time seeing the sights and eating tons of sushi. Everywhere we went was wonderful, but Kyoto really ___16___ as the best. People say Kyoto is beautiful no matter what the season is, but I think we were very lucky to be there in spring. It felt magical to walk through the temple areas with cherry trees ___17___ all around us.
-Speaking of temples, Kinkaku-ji must be the most incredible place I've ever seen. When I first sighted the golden pavilion shining in the distance through the trees, I was amazed. I spent two hours ___18___ pictures of the pavilion and its reflection in the pond in front of it. I've attached a few of the photos to this email for you to see. ___19___ though, even my best pictures can't show just how beautiful this place was. Whatever you do, don't go to Japan ___20___ Kyoto, or you would be missing out on so much. Let me know how your trip goes! Love, Dad`;
-        const EX6_TXT = `My name is Nuñez, and I am a mountain climber. I had a strange adventure many years ago. While climbing a mountain in South America, I lost my balance and fell, ___16___ myself badly. Even though I was in pain and shock, I kept moving to explore the valley.
-After a while, I reached a small, unusual village. The houses were painted in strange ways, and the streets had low walls along their sides. At first, I was confused, but soon, I realized that everyone there was blind.
-A kind elderly man named Yacob had been ___17___ me since I arrived. He showed me how the people there lived using other senses instead of sight. I was amazed ___18___ how well these people could live without being able to see. Then, I met a beautiful girl named Medina. I thought I was falling in love.
-However, the villagers did not believe that I could see. They thought I was ___19___ dishonest or crazy and that sight was not real. Even Medina didn't believe me, and she insisted that I remove my eyes to ___20___ to life in the village. It broke my heart to leave Medina, but I knew I couldn't give up my sight. Finally, I escaped from the village on the morning of my surgery.`;
+        const EX4_TXT = `In early October, I received something special in the mail. It was a postcard with my name and address written on it, and it came all the way from Merida, Mexico. I ___16___ the handwriting right away because it belonged to my good friend Pedro. He invited me to join him for the Day of the Dead, a major annual Mexican festival to remember ___17___ who are no longer with us.\nMexicans do not fear death. ___18___, they have embraced and celebrated this fact of life for centuries with street parades, all-night parties, and special dishes like pibipollo. This, by the way, is chicken wrapped and steamed in banana leaves and is believed ___19___ just as popular among the dead as among the living! Of course, I was dying to see all of this in person, so just three weeks later I was on a plane ___20___ Mexico. Needless to say, I had my scary costume packed!`;
+        const EX5_TXT = `Dear Allie, Your mom said you are planning a trip to Japan and asked me to email you about our trip last year. We had a great time seeing the sights and eating tons of sushi. Everywhere we went was wonderful, but Kyoto really ___16___ as the best. People say Kyoto is beautiful no matter what the season is, but I think we were very lucky to be there in spring. It felt magical to walk through the temple areas with cherry trees ___17___ all around us.\nSpeaking of temples, Kinkaku-ji must be the most incredible place I've ever seen. When I first sighted the golden pavilion shining in the distance through the trees, I was amazed. I spent two hours ___18___ pictures of the pavilion and its reflection in the pond in front of it. I've attached a few of the photos to this email for you to see. ___19___ though, even my best pictures can't show just how beautiful this place was. Whatever you do, don't go to Japan ___20___ Kyoto, or you would be missing out on so much. Let me know how your trip goes! Love, Dad`;
+        const EX6_TXT = `My name is Nuñez, and I am a mountain climber. I had a strange adventure many years ago. While climbing a mountain in South America, I lost my balance and fell, ___16___ myself badly. Even though I was in pain and shock, I kept moving to explore the valley.\nAfter a while, I reached a small, unusual village. The houses were painted in strange ways, and the streets had low walls along their sides. At first, I was confused, but soon, I realized that everyone there was blind.\nA kind elderly man named Yacob had been ___17___ me since I arrived. He showed me how the people there lived using other senses instead of sight. I was amazed ___18___ how well these people could live without being able to see. Then, I met a beautiful girl named Medina. I thought I was falling in love.\nHowever, the villagers did not believe that I could see. They thought I was ___19___ dishonest or crazy and that sight was not real. Even Medina didn't believe me, and she insisted that I remove my eyes to ___20___ to life in the village. It broke my heart to leave Medina, but I knew I couldn't give up my sight. Finally, I escaped from the village on the morning of my surgery.`;
 
-        // 獨立出每個題組的文章變數，供每一題重複使用，解決「同上」問題
         const CL4_1 = `【單字庫】\n(A) occasion  (B) concept  (C) sorrow  (D) accompany\n(E) reunion  (F) essential  (G) mourn  (H) joyous\n\nHave you ever thought about what it would be like to have a deceased loved one return and (1) ________ you to a holiday celebration? The idea may scare you to death or at least make your hair stand on end, but this is the (2) ________ (3) ________ behind the Mexican festival called the Day of the Dead, when people celebrate death with joy and humor rather than (4) ________ it with (5) ________. On this (6) ________ (7) ________, family members gather for a (8) ________ in honor of those who have moved on to the afterlife.`;
         const CL4_2 = `【單字庫】\n(A) dawn  (B) reception  (C) arrival  (D) transforming\n(E) preference  (F) anticipate  (G) feast  (H) decorate\n\n...Instead of fearing these spirits, Mexicans (1) ________ their (2) ________ and prepare for it by purchasing necessary items in local markets in advance. ... On the altars, they place photographs of their deceased loved ones as well as beverages and dishes that those family members had a (3) ________ for while alive. After this warm (4) ________ for the souls at home, it is usually late in the evening, and families head to the cemetery, where they (5) ________ the graves of their loved ones and light one candle for each dead person. Cheerful and merry, they (6) ________ with the honored souls and pray till (7) ________, (8) ________ the normally horrifying graveyard into a venue of joy and celebration for the entire night.`;
         const CL4_3 = `【單字庫】\n(A) escape  (B) recognizing  (C) annual  (D) cycle\n(E) mocking  (F) inevitable  (G) awaits  (H) participate  (I) resemble\n\nMany people also dress up in skeleton costumes, paint their faces to (1) ________ skulls, and (2) ________ in performances and street parades. While doing so, Mexicans aren't (3) ________ death. Instead, they are (4) ________ it as an (5) ________ part of the natural (6) ________ and would rather embrace it than ignore it. ... The Mexican Day of the Dead is an (7) ________ national event that brings together living hosts and non-living guests of honor. Hopefully, this tradition will never die out, since it helps people accept a fact of life that (8) ________ us all. If we cannot (9) ________ death, why not celebrate it?`;
@@ -282,33 +285,33 @@ However, the villagers did not believe that I could see. They thought I was ___1
                 ]
             },
             'L5_Grammar': {
-                title: "L5 文法測驗 (雙重否定與感官被動強化)",
+                title: "L5 文法測驗 (感官動詞被動與雙重否定)",
                 questions: [
-                    {q: "1. A strange man was seen ________ into the house through the back window last night.", o: ["(A) sneak", "(B) sneaked", "(C) to sneak", "(D) was sneaking"], a: 2, e: "正解: (C) 被動語態的感官動詞後，若強調事實過程需將省略的 to 還原，用 to V。"},
-                    {q: "2. He is a very pessimistic person; he never faces a challenge ________ complaining about how hard it is.", o: ["(A) unless", "(B) but", "(C) without", "(D) except"], a: 2, e: "正解: (C) never... without + V-ing (每次...必定...)，介系詞without後接動名詞。"},
-                    {q: "3. The little girl was heard ________ beautifully in her room when I walked past.", o: ["(A) to be sung", "(B) sing", "(C) singing", "(D) sang"], a: 2, e: "正解: (C) 被動語態感官動詞後，若強調「正在進行」的動作，保留 V-ing。"},
-                    {q: "4. When dealing with highly toxic chemicals, scientists cannot be ________ careful.", o: ["(A) very", "(B) much", "(C) too", "(D) over"], a: 2, e: "正解: (C) cannot... too + 形容詞 (再怎麼...也不為過)。"},
-                    {q: "5. There is no one in this company ________ respects the hard-working manager.", o: ["(A) who", "(B) but", "(C) without", "(D) except"], a: 1, e: "正解: (B) no + N + but + V (沒有不...的人)。but 在此相當於 that...not (who doesn't respect)。"},
-                    {q: "6. The thief was caught on camera and was seen ________ the jewelry from the safe.", o: ["(A) stealing", "(B) steal", "(C) stole", "(D) to be stolen"], a: 0, e: "正解: (A) 被動感官動詞後接 V-ing 強調當時正在進行的動作。"},
-                    {q: "7. It never rains in this particular region ________ it pours, causing severe floods.", o: ["(A) unless", "(B) when", "(C) but", "(D) without"], a: 2, e: "正解: (C) never rains but it pours (不下則已，一鳴驚人/屋漏偏逢連夜雨)。but 後面接子句。"},
-                    {q: "8. A responsible student never ________ to hand in assignments on time.", o: ["(A) fails", "(B) stops", "(C) drops", "(D) avoids"], a: 0, e: "正解: (A) never fail to V (一定會... / 從未未能...)。"},
-                    {q: "9. The famous actor was seen ________ coffee at a local café yesterday morning.", o: ["(A) drink", "(B) to be drunk", "(C) drinking", "(D) drank"], a: 2, e: "正解: (C) 被看見正在喝咖啡，用 V-ing。"},
-                    {q: "10. The importance of daily practice in learning a language cannot be ________.", o: ["(A) overemphasized", "(B) overemphasizing", "(C) too emphasize", "(D) overemphasize"], a: 0, e: "正解: (A) cannot be overemphasized (再怎麼強調也不為過)。用被動。"},
-                    {q: "11. The explosion was so loud that it was heard ________ miles away.", o: ["(A) to happen", "(B) happening", "(C) happen", "(D) happened"], a: 0, e: "正解: (A) 聽到某事發生(完整事實)，被動語態須加回 to。"},
-                    {q: "12. I hardly ever listen to this classic song ________ thinking of my childhood friends.", o: ["(A) but", "(B) except", "(C) without", "(D) unless"], a: 2, e: "正解: (C) hardly... without + V-ing (幾乎沒有一次...不...)。"},
-                    {q: "13. The suspect was seen ________ a black bag into the river before he ran away.", o: ["(A) to throw", "(B) throw", "(C) threw", "(D) to be thrown"], a: 0, e: "正解: (A) 強調丟棄的完整動作，被動語態感官動詞後接 to V。"},
-                    {q: "14. Mr. Smith visits his mother at the nursing home every Sunday ________ fail.", o: ["(A) never", "(B) not", "(C) no", "(D) without"], a: 3, e: "正解: (D) without fail (必定 / 毫無例外地)。"},
-                    {q: "15. A group of children were heard ________ and laughing happily in the playground.", o: ["(A) play", "(B) playing", "(C) played", "(D) to be playing"], a: 1, e: "正解: (B) 聽見正在進行的動作，且配合後面的 laughing (V-ing 對稱)。"},
-                    {q: "16. In modern society, it is not ________ for people to change careers multiple times.", o: ["(A) common", "(B) uncommon", "(C) commonly", "(D) uncommonly"], a: 1, e: "正解: (B) not uncommon = 雙重否定表肯定(很常見)。"},
-                    {q: "17. The old man was seen ________ the street slowly with a cane.", o: ["(A) cross", "(B) to be crossed", "(C) crossing", "(D) crossed"], a: 2, e: "正解: (C) 被看見正在過馬路，用 V-ing。"},
-                    {q: "18. I cannot thank you ________ for your generous support during my difficult times.", o: ["(A) much", "(B) a lot", "(C) enough", "(D) over"], a: 2, e: "正解: (C) cannot... enough (再怎麼...也不為過)。"},
-                    {q: "19. The baby was heard ________ in the middle of the night, waking up the parents.", o: ["(A) to cry", "(B) cry", "(C) crying", "(D) to be cried"], a: 2, e: "正解: (C) 聽見正在哭，用 V-ing。"},
-                    {q: "20. There is no rule ________ has some exceptions.", o: ["(A) without", "(B) who", "(C) but", "(D) that"], a: 2, e: "正解: (C) no rule but has... = 凡規則必有例外。but = that doesn't。"},
-                    {q: "21. A bright meteor was seen ________ across the night sky, disappearing in a second.", o: ["(A) to flash", "(B) flashing", "(C) flash", "(D) flashed"], a: 0, e: "正解: (A) 一瞬間發生的完整動作，被動語態後加 to V。(B亦可，但A更強調完整動作，若大考兩者不會同時考，優先選 to V 或 V-ing 中合理的)"},
-                    {q: "22. The patient's condition is critical; the doctors cannot be ________ attentive.", o: ["(A) over", "(B) very", "(C) too", "(D) enough"], a: 2, e: "正解: (C) cannot be too + 形容詞 (再怎麼細心也不為過)。"},
-                    {q: "23. The students were heard ________ the math problem loudly in the library.", o: ["(A) discuss", "(B) discussed", "(C) discussing", "(D) to discussing"], a: 2, e: "正解: (C) 聽見正在討論，用 V-ing。"},
-                    {q: "24. His dedication to teaching ________ be praised too highly.", o: ["(A) must", "(B) should", "(C) cannot", "(D) may"], a: 2, e: "正解: (C) cannot... too highly (再怎麼高估/稱讚也不為過)。"},
-                    {q: "25. The magician was seen ______ a rabbit out of his hat on the stage.", o: ["(A) pull", "(B) to pull", "(C) pulled", "(D) to be pulled"], a: 1, e: "正解: (B) 完整動作被看見，被動語態加 to V。"}
+                    {q: "1. The famous singer was seen ________ a cup of coffee at the corner café yesterday, but nobody dared to bother her.", o: ["(A) drink", "(B) drank", "(C) drinking", "(D) to drinking"], a: 2, e: "正解: (C) 被動感官動詞強調動作「正在進行」，故選 V-ing (drinking)。不能選 (A)，因為被動不可直接加原形。"},
+                    {q: "2. Whenever Kelly looks at this old photograph, she thinks of her late grandfather. = Kelly can never look at this old photograph ________ of her late grandfather.", o: ["(A) rather than think", "(B) without thinking", "(C) but to think", "(D) instead of thinking"], a: 1, e: "正解: (B) 雙重否定替換題。「每次看照片必想到爺爺」= never look at it without thinking of him。"},
+                    {q: "3. According to the police report, the suspect was observed ________ the building through the back door around midnight.", o: ["(A) to enter", "(B) enter", "(C) entered", "(D) to entering"], a: 0, e: "正解: (A) observe (觀察) 也是感官動詞。被動語態強調「進入」的完整動作，原形動詞被動化須補回 to，故選 to enter。"},
+                    {q: "4. Not a single day goes by ________ the devoted mother worrying about her son who is studying overseas.", o: ["(A) without", "(B) except", "(C) unless", "(D) instead of"], a: 0, e: "正解: (A) Not a day goes by without... (沒有一天不...) 為大考常見的雙重否定固定句型。"},
+                    {q: "5. The terrible earthquake struck suddenly. Several buildings were felt ________ violently before they collapsed.", o: ["(A) shake", "(B) shook", "(C) to shake", "(D) to shaking"], a: 2, e: "正解: (C) feel 被動化。強調感受到搖晃的動作，原形 shake 須補回 to 變 to shake。(若有 shaking 也可，但選項中無)。"},
+                    {q: "6. As the saying goes, \"There is no rule ________ exceptions.\" Every situation has its special cases.", o: ["(A) having", "(B) making", "(C) out of", "(D) without"], a: 3, e: "正解: (D) 經典諺語 \"There is no rule without exceptions.\" (凡規則必有例外)。"},
+                    {q: "7. The naughty student was noticed ________ the confidential documents into his bag when the teacher was not looking.", o: ["(A) to slip", "(B) slip", "(C) slipped", "(D) to slipping"], a: 0, e: "正解: (A) notice 被動化。原形 slip 補回 to 變 to slip。"},
+                    {q: "8. No great achievement in human history can be made ________ overcoming numerous obstacles and failures.", o: ["(A) by", "(B) without", "(C) unless", "(D) from"], a: 1, e: "正解: (B) 雙重否定。沒有成就「能在不克服障礙的情況下」達成。"},
+                    {q: "9. The missing dog was finally found by the river. It was seen ________ wildly in the mud.", o: ["(A) run", "(B) running", "(C) to running", "(D) ran"], a: 1, e: "正解: (B) 被動感官強調當下「正在」瘋狂奔跑，用 V-ing running。"},
+                    {q: "10. Hardly does my sister watch a romantic movie ________ a few tears at the end.", o: ["(A) without shedding", "(B) to shed", "(C) but shedding", "(D) except shed"], a: 0, e: "正解: (A) 句首 Hardly (幾乎不) 構成雙重否定。「幾乎沒有看愛情片而不流淚的」，接 without V-ing。"},
+                    {q: "11. Because the walls of the apartment are very thin, the couple next door can often be heard ________ over trivial things.", o: ["(A) argue", "(B) to arguing", "(C) arguing", "(D) argued"], a: 2, e: "正解: (C) 強調隔壁夫妻「正在」爭吵的狀態被聽到，用 V-ing arguing。"},
+                    {q: "12. No visit to Paris would be complete ________ a romantic walk along the Seine River.", o: ["(A) without taking", "(B) to take", "(C) unless taking", "(D) by taking"], a: 0, e: "正解: (A) 雙重否定。去巴黎不能不 (without) 沿著塞納河散步。"},
+                    {q: "13. The manager was heard ________ the new employee for his careless mistake in front of everyone.", o: ["(A) scold", "(B) to scold", "(C) scolded", "(D) to scolding"], a: 1, e: "正解: (B) 聽到經理責罵員工 (強調動作事實)，原形被動化須補回 to，變成 to scold。"},
+                    {q: "14. \"Whenever it rains, it pours.\" This proverb means that it never rains ________ pouring.", o: ["(A) besides", "(B) instead of", "(C) without", "(D) out of"], a: 2, e: "正解: (C) 經典諺語 \"It never rains without pouring.\" (不雨則已，一鳴驚人 / 禍不單行)。"},
+                    {q: "15. The man, who was seen ________ around the jewelry store for hours, was finally approached by the security guard.", o: ["(A) loiter", "(B) loitering", "(C) to loitering", "(D) loitered"], a: 1, e: "正解: (B) 關係代名詞中的被動感官。強調「正在」徘徊，用 loitering。"},
+                    {q: "16. My father is a workaholic. He never goes on a family vacation ________ his laptop with him.", o: ["(A) except bringing", "(B) without bringing", "(C) unless bringing", "(D) to bring"], a: 1, e: "正解: (B) 「從來沒有不帶筆電就去度假」，without + V-ing。"},
+                    {q: "17. The door was suddenly heard ________, and then a stranger was seen ________ into the dark room.", o: ["(A) to open ; to walk", "(B) open ; walk", "(C) opening ; walk", "(D) to opening ; walking"], a: 0, e: "正解: (A) 雙重感官動詞被動考法。門被聽到打開 (to open)，陌生人被看到走進來 (to walk)，兩者原本皆為原形，皆須補回 to。"},
+                    {q: "18. No true friendship can be built ________ sharing both joys and sorrows together.", o: ["(A) within", "(B) without", "(C) beyond", "(D) beneath"], a: 1, e: "正解: (B) 雙重否定。「沒有建立在不分享喜怒哀樂上的友誼」。"},
+                    {q: "19. A weird sound was heard ________ from the basement in the middle of the night, which scared everyone in the house.", o: ["(A) come", "(B) came", "(C) coming", "(D) to coming"], a: 2, e: "正解: (C) 強調怪聲「正在」傳來，用 V-ing coming。"},
+                    {q: "20. He never speaks in public ________ by his peers, which has made him extremely shy.", o: ["(A) without mocking", "(B) without being mocked", "(C) instead of mocking", "(D) unless to be mocked"], a: 1, e: "正解: (B) 雙重否定+被動動名詞。他每次公開發言一定「被」同儕嘲笑，故 without 後接 being mocked。"},
+                    {q: "21. The suspect was caught on camera. He was clearly seen ________ the safe, but surprisingly, no alarm was heard ________ off.", o: ["(A) to unlock ; to go", "(B) unlocking ; gone", "(C) unlock ; go", "(D) unlocked ; to going"], a: 0, e: "正解: (A) 前後皆為被動感官動詞 (was seen / was heard)，原本為原形動詞的 unlock 和 go，皆須補回 to。"},
+                    {q: "22. According to the witness, the suspect was seen ________ a heavy suitcase into the river, but nobody heard it ________ the water.", o: ["(A) throwing ; to hit", "(B) to throw ; hit", "(C) throw ; hit", "(D) to throwing ; hitting"], a: 1, e: "正解: (B) 前半 was seen 是被動，接 to throw；後半 nobody heard it 是主動，主動感官直接接原形動詞 hit。此題為頂尖易錯陷阱題！"},
+                    {q: "23. The political scandal was so huge that the mayor couldn't step out of the city hall ________ by a crowd of angry protesters.", o: ["(A) without being surrounded", "(B) without surrounding", "(C) except to be surrounded", "(D) instead of surrounding"], a: 0, e: "正解: (A) 雙重否定中市長是「被」包圍，without 為介系詞，後面須加被動動名詞 being surrounded。"},
+                    {q: "24. According to the veteran detective, ________ does a seasoned criminal commit a crime ________ behind some crucial evidence.", o: ["(A) rarely ; without leaving", "(B) often ; without being left", "(C) never ; unless leaving", "(D) seldom ; except to leave"], a: 0, e: "正解: (A) 否定副詞 Rarely 置於句首倒裝，配合雙重否定 without + V-ing，意指「老練罪犯幾乎不會不留證據就犯罪」。"},
+                    {q: "25. Not once has the dedicated researcher left the laboratory ________ ensuring all the equipment is turned off, and he is frequently seen ________ alone in his office late at night.", o: ["(A) without ; working", "(B) unless ; to work", "(C) except ; work", "(D) besides ; worked"], a: 0, e: "正解: (A) 前半段 Not once... without 構成雙重否定（沒有一次不確認）。後半段 is seen 強調「正在」工作，故接 working。"}
                 ]
             },
             'L6_Grammar': {
@@ -465,99 +468,11 @@ However, the villagers did not believe that I could see. They thought I was ___1
                     {p: EX6_TXT, q: "(19) 請問應填入？", o: ["(A) neither", "(B) either", "(C) both", "(D) not only"], a: 1, e: "either... or..."},
                     {p: EX6_TXT, q: "(20) 請問應填入？", o: ["(A) navigate", "(B) tumble", "(C) twinkle", "(D) adapt"], a: 3, e: "adapt to (適應)"}
                 ]
-            },
-            'L4_Cloze': {
-                title: "L4 文意選填",
-                questions: [
-                    {p: CL4_1, q: "(1) 第一格", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 3, e: "accompany"},
-                    {p: CL4_1, q: "(2) 第二格", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 5, e: "essential"},
-                    {p: CL4_1, q: "(3) 第三格", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 1, e: "concept"},
-                    {p: CL4_1, q: "(4) 第四格", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 6, e: "mourn"},
-                    {p: CL4_1, q: "(5) 第五格", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 2, e: "sorrow"},
-                    {p: CL4_1, q: "(6) 第六格", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 7, e: "joyous"},
-                    {p: CL4_1, q: "(7) 第七格", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 0, e: "occasion"},
-                    {p: CL4_1, q: "(8) 第八格", o: ["(A) occasion", "(B) concept", "(C) sorrow", "(D) accompany", "(E) reunion", "(F) essential", "(G) mourn", "(H) joyous"], a: 4, e: "reunion"},
-                    {p: CL4_2, q: "(1) 第一格", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 5, e: "anticipate"},
-                    {p: CL4_2, q: "(2) 第二格", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 2, e: "arrival"},
-                    {p: CL4_2, q: "(3) 第三格", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 4, e: "preference"},
-                    {p: CL4_2, q: "(4) 第四格", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 1, e: "reception"},
-                    {p: CL4_2, q: "(5) 第五格", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 7, e: "decorate"},
-                    {p: CL4_2, q: "(6) 第六格", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 6, e: "feast"},
-                    {p: CL4_2, q: "(7) 第七格", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 0, e: "dawn"},
-                    {p: CL4_2, q: "(8) 第八格", o: ["(A) dawn", "(B) reception", "(C) arrival", "(D) transforming", "(E) preference", "(F) anticipate", "(G) feast", "(H) decorate"], a: 3, e: "transforming"},
-                    {p: CL4_3, q: "(1) 第一格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 8, e: "resemble"},
-                    {p: CL4_3, q: "(2) 第二格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 7, e: "participate"},
-                    {p: CL4_3, q: "(3) 第三格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 4, e: "mocking"},
-                    {p: CL4_3, q: "(4) 第四格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 1, e: "recognizing"},
-                    {p: CL4_3, q: "(5) 第五格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 5, e: "inevitable"},
-                    {p: CL4_3, q: "(6) 第六格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 3, e: "cycle"},
-                    {p: CL4_3, q: "(7) 第七格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 2, e: "annual"},
-                    {p: CL4_3, q: "(8) 第八格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 6, e: "awaits"},
-                    {p: CL4_3, q: "(9) 第九格", o: ["(A) escape", "(B) recognizing", "(C) annual", "(D) cycle", "(E) mocking", "(F) inevitable", "(G) awaits", "(H) participate", "(I) resemble"], a: 0, e: "escape"}
-                ]
-            },
-            'L5_Cloze': {
-                title: "L5 文意選填",
-                questions: [
-                    {p: CL5_1, q: "(1) 第一格", o: ["(A) capital", "(B) rustling", "(C) boasts", "(D) blossoms", "(E) previously", "(F) landscape", "(G) historic", "(H) splendor"], a: 3, e: "blossoms"},
-                    {p: CL5_1, q: "(2) 第二格", o: ["(A) capital", "(B) rustling", "(C) boasts", "(D) blossoms", "(E) previously", "(F) landscape", "(G) historic", "(H) splendor"], a: 1, e: "rustling"},
-                    {p: CL5_1, q: "(3) 第三格", o: ["(A) capital", "(B) rustling", "(C) boasts", "(D) blossoms", "(E) previously", "(F) landscape", "(G) historic", "(H) splendor"], a: 5, e: "landscape"},
-                    {p: CL5_1, q: "(4) 第四格", o: ["(A) capital", "(B) rustling", "(C) boasts", "(D) blossoms", "(E) previously", "(F) landscape", "(G) historic", "(H) splendor"], a: 7, e: "splendor"},
-                    {p: CL5_1, q: "(5) 第五格", o: ["(A) capital", "(B) rustling", "(C) boasts", "(D) blossoms", "(E) previously", "(F) landscape", "(G) historic", "(H) splendor"], a: 4, e: "previously"},
-                    {p: CL5_1, q: "(6) 第六格", o: ["(A) capital", "(B) rustling", "(C) boasts", "(D) blossoms", "(E) previously", "(F) landscape", "(G) historic", "(H) splendor"], a: 0, e: "capital"},
-                    {p: CL5_1, q: "(7) 第七格", o: ["(A) capital", "(B) rustling", "(C) boasts", "(D) blossoms", "(E) previously", "(F) landscape", "(G) historic", "(H) splendor"], a: 2, e: "boasts"},
-                    {p: CL5_1, q: "(8) 第八格", o: ["(A) capital", "(B) rustling", "(C) boasts", "(D) blossoms", "(E) previously", "(F) landscape", "(G) historic", "(H) splendor"], a: 6, e: "historic"},
-                    
-                    {p: CL5_2, q: "(1) 第一格", o: ["(A) breathtaking", "(B) stunning", "(C) magnificent", "(D) leisurely", "(E) entrance"], a: 4, e: "entrance"},
-                    {p: CL5_2, q: "(2) 第二格", o: ["(A) breathtaking", "(B) stunning", "(C) magnificent", "(D) leisurely", "(E) entrance"], a: 2, e: "magnificent"},
-                    {p: CL5_2, q: "(3) 第三格", o: ["(A) breathtaking", "(B) stunning", "(C) magnificent", "(D) leisurely", "(E) entrance"], a: 1, e: "stunning"},
-                    {p: CL5_2, q: "(4) 第四格", o: ["(A) breathtaking", "(B) stunning", "(C) magnificent", "(D) leisurely", "(E) entrance"], a: 3, e: "leisurely"},
-                    {p: CL5_2, q: "(5) 第五格", o: ["(A) breathtaking", "(B) stunning", "(C) magnificent", "(D) leisurely", "(E) entrance"], a: 0, e: "breathtaking"},
-                    
-                    {p: CL5_3, q: "(1) 第一格", o: ["(A) appearance", "(B) deliberate", "(C) distinctive", "(D) destination", "(E) elegant", "(F) delicate", "(G) literature"], a: 4, e: "elegant"},
-                    {p: CL5_3, q: "(2) 第二格", o: ["(A) appearance", "(B) deliberate", "(C) distinctive", "(D) destination", "(E) elegant", "(F) delicate", "(G) literature"], a: 2, e: "distinctive"},
-                    {p: CL5_3, q: "(3) 第三格", o: ["(A) appearance", "(B) deliberate", "(C) distinctive", "(D) destination", "(E) elegant", "(F) delicate", "(G) literature"], a: 5, e: "delicate"},
-                    {p: CL5_3, q: "(4) 第四格", o: ["(A) appearance", "(B) deliberate", "(C) distinctive", "(D) destination", "(E) elegant", "(F) delicate", "(G) literature"], a: 0, e: "appearance"},
-                    {p: CL5_3, q: "(5) 第五格", o: ["(A) appearance", "(B) deliberate", "(C) distinctive", "(D) destination", "(E) elegant", "(F) delicate", "(G) literature"], a: 6, e: "literature"},
-                    {p: CL5_3, q: "(6) 第六格", o: ["(A) appearance", "(B) deliberate", "(C) distinctive", "(D) destination", "(E) elegant", "(F) delicate", "(G) literature"], a: 1, e: "deliberate"},
-                    {p: CL5_3, q: "(7) 第七格", o: ["(A) appearance", "(B) deliberate", "(C) distinctive", "(D) destination", "(E) elegant", "(F) delicate", "(G) literature"], a: 3, e: "destination"}
-                ]
-            },
-            'L6_Cloze': {
-                title: "L6 文意選填",
-                questions: [
-                    {p: CL6_1, q: "(1) 第一格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 8, e: "slope"},
-                    {p: CL6_1, q: "(2) 第二格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 4, e: "tumbling"},
-                    {p: CL6_1, q: "(3) 第三格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 1, e: "bruised"},
-                    {p: CL6_1, q: "(4) 第四格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 6, e: "superior"},
-                    {p: CL6_1, q: "(5) 第五格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 3, e: "intimately"},
-                    {p: CL6_1, q: "(6) 第六格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 7, e: "skillfully"},
-                    {p: CL6_1, q: "(7) 第七格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 5, e: "crops"},
-                    {p: CL6_1, q: "(8) 第八格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 0, e: "paths"},
-                    {p: CL6_1, q: "(9) 第九格", o: ["(A) paths", "(B) bruised", "(C) navigate", "(D) intimately", "(E) tumbling", "(F) crops", "(G) superior", "(H) skillfully", "(I) slope"], a: 2, e: "navigate"},
-                    
-                    {p: CL6_2, q: "(1) 第一格", o: ["(A) pitied", "(B) adapted", "(C) smoothness", "(D) awe", "(E) outsider", "(F) twinkling", "(G) clung"], a: 4, e: "outsider"},
-                    {p: CL6_2, q: "(2) 第二格", o: ["(A) pitied", "(B) adapted", "(C) smoothness", "(D) awe", "(E) outsider", "(F) twinkling", "(G) clung"], a: 1, e: "adapted"},
-                    {p: CL6_2, q: "(3) 第三格", o: ["(A) pitied", "(B) adapted", "(C) smoothness", "(D) awe", "(E) outsider", "(F) twinkling", "(G) clung"], a: 6, e: "clung"},
-                    {p: CL6_2, q: "(4) 第四格", o: ["(A) pitied", "(B) adapted", "(C) smoothness", "(D) awe", "(E) outsider", "(F) twinkling", "(G) clung"], a: 5, e: "twinkling"},
-                    {p: CL6_2, q: "(5) 第五格", o: ["(A) pitied", "(B) adapted", "(C) smoothness", "(D) awe", "(E) outsider", "(F) twinkling", "(G) clung"], a: 0, e: "pitied"},
-                    {p: CL6_2, q: "(6) 第六格", o: ["(A) pitied", "(B) adapted", "(C) smoothness", "(D) awe", "(E) outsider", "(F) twinkling", "(G) clung"], a: 3, e: "awe"},
-                    {p: CL6_2, q: "(7) 第七格", o: ["(A) pitied", "(B) adapted", "(C) smoothness", "(D) awe", "(E) outsider", "(F) twinkling", "(G) clung"], a: 2, e: "smoothness"},
-                    
-                    {p: CL6_3, q: "(1) 第一格", o: ["(A) peculiar", "(B) gazing", "(C) confronted", "(D) fled", "(E) opposition", "(F) envisioning", "(G) Nevertheless", "(H) dilemma"], a: 4, e: "opposition"},
-                    {p: CL6_3, q: "(2) 第二格", o: ["(A) peculiar", "(B) gazing", "(C) confronted", "(D) fled", "(E) opposition", "(F) envisioning", "(G) Nevertheless", "(H) dilemma"], a: 0, e: "peculiar"},
-                    {p: CL6_3, q: "(3) 第三格", o: ["(A) peculiar", "(B) gazing", "(C) confronted", "(D) fled", "(E) opposition", "(F) envisioning", "(G) Nevertheless", "(H) dilemma"], a: 2, e: "confronted"},
-                    {p: CL6_3, q: "(4) 第四格", o: ["(A) peculiar", "(B) gazing", "(C) confronted", "(D) fled", "(E) opposition", "(F) envisioning", "(G) Nevertheless", "(H) dilemma"], a: 7, e: "dilemma"},
-                    {p: CL6_3, q: "(5) 第五格", o: ["(A) peculiar", "(B) gazing", "(C) confronted", "(D) fled", "(E) opposition", "(F) envisioning", "(G) Nevertheless", "(H) dilemma"], a: 6, e: "Nevertheless"},
-                    {p: CL6_3, q: "(6) 第六格", o: ["(A) peculiar", "(B) gazing", "(C) confronted", "(D) fled", "(E) opposition", "(F) envisioning", "(G) Nevertheless", "(H) dilemma"], a: 1, e: "gazing"},
-                    {p: CL6_3, q: "(7) 第七格", o: ["(A) peculiar", "(B) gazing", "(C) confronted", "(D) fled", "(E) opposition", "(F) envisioning", "(G) Nevertheless", "(H) dilemma"], a: 5, e: "envisioning"},
-                    {p: CL6_3, q: "(8) 第八格", o: ["(A) peculiar", "(B) gazing", "(C) confronted", "(D) fled", "(E) opposition", "(F) envisioning", "(G) Nevertheless", "(H) dilemma"], a: 3, e: "fled"}
-                ]
             }
         };
 
         let app, db, auth;
-        let currentUser = null, currentStudentName = "";
+        let currentStudentName = "";
         let activeModule = null, currentQuestions = [], currentQIndex = 0, currentScore = 0;
         let isQuizActive = false, cheatingAttempts = 0, userAnswersHistory = [], pendingDraftData = null;
         let teacherLiveUnsub = null, teacherRecordsUnsub = null;
@@ -576,17 +491,54 @@ However, the villagers did not believe that I could see. They thought I was ___1
         }
         window.closeWarningModal = () => document.getElementById('modal-warning').classList.add('hidden');
 
-        function switchView(id) {
+        // ★ 核心升級：導入 History API，讓「上一頁」不會重整網頁
+        function switchView(id, pushState = true) {
             ['view-login', 'view-dashboard', 'view-quiz', 'view-records', 'view-teacher-dashboard', 'view-mistakes'].forEach(v => {
                 const el = document.getElementById(v);
                 if(el) el.classList.add('hidden');
             });
             document.getElementById(id).classList.remove('hidden');
             window.scrollTo(0,0);
+            
+            if (pushState) {
+                history.pushState({ view: id }, "", `#${id}`);
+            }
         }
+
+        // 監聽瀏覽器「上一頁 / 下一頁」事件
+        window.addEventListener('popstate', (e) => {
+            if (e.state && e.state.view) {
+                // 若考試到一半按了上一頁，視為暫停並存檔
+                if (isQuizActive && e.state.view !== 'view-quiz') {
+                    autoSaveProgress();
+                    isQuizActive = false; 
+                }
+                switchView(e.state.view, false);
+            } else {
+                // 如果沒有歷史紀錄，預設回到選單（有登入的話）或登入頁
+                if (currentStudentName) switchView('view-dashboard', false);
+                else switchView('view-login', false);
+            }
+        });
+
+        // 呼叫瀏覽器內建語音引擎 (支援單字發音)
+        window.playWordAudio = function(word) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); 
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US'; // 美式發音
+                utterance.rate = 0.85;    // 適合聽寫的語速
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('您的瀏覽器不支援語音發音功能喔！建議使用 Chrome 或 Safari。');
+            }
+        };
 
         async function initApp() {
             setupAntiCheat();
+            // 載入時先推入一個初始狀態
+            history.replaceState({ view: 'view-login' }, "", "#view-login");
+            
             try { app = initializeApp(firebaseConfig); db = getFirestore(app); auth = getAuth(app); } catch(e) {}
             document.getElementById('btn-login').addEventListener('click', handleLogin);
         }
@@ -594,9 +546,23 @@ However, the villagers did not believe that I could see. They thought I was ___1
         async function handleLogin() {
             const name = document.getElementById('student-name').value.trim();
             if (!name) return alert("請輸入您的姓名！");
-            document.getElementById('btn-login').innerText = '連線中...';
-            try { if (auth) { await signInAnonymously(auth); currentUser = auth.currentUser; } } catch(e) { currentUser = { uid: 'local_' + Date.now() }; }
+            
+            document.getElementById('btn-login').innerText = '雲端資料同步中...';
             currentStudentName = name;
+
+            // 啟動姓名綁定的雲端同步 (抓取過往成績供「錯題本」與「明細」使用，認名不認機)
+            if(db) {
+                try {
+                    const q = query(collection(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_records'), where("studentName", "==", name));
+                    const querySnapshot = await getDocs(q);
+                    let cloudHist = [];
+                    querySnapshot.forEach((doc) => { cloudHist.push(doc.data()); });
+                    if(cloudHist.length > 0) {
+                        localStorage.setItem(`hist_${name}`, JSON.stringify(cloudHist));
+                    }
+                } catch(e) { console.log("Cloud sync skipped or failed"); }
+            }
+
             document.getElementById('display-student-name').innerText = name;
             document.getElementById('nav-user-info').classList.remove('hidden');
             document.getElementById('btn-teacher-nav').classList.add('hidden');
@@ -606,9 +572,10 @@ However, the villagers did not believe that I could see. They thought I was ___1
 
         window.checkDraftAndStart = async function(moduleId) {
             activeModule = moduleId; 
-            if (currentUser && db && !currentUser.uid.startsWith('local_')) {
+            if (db && currentStudentName) {
                 try {
-                    const snap = await getDoc(doc(db, 'artifacts', 'english-course-l4l6', 'users', currentUser.uid, 'progress', moduleId));
+                    // 全雲端綁定：使用 currentStudentName 作為路徑，跨裝置也能接續作答
+                    const snap = await getDoc(doc(db, 'artifacts', 'english-course-l4l6', 'users', currentStudentName, 'progress', moduleId));
                     if (snap.exists() && snap.data().currentQIndex > 0) {
                         pendingDraftData = snap.data();
                         document.getElementById('resume-description').innerText = `偵測到「${quizData[moduleId].title}」有未完成紀錄。`;
@@ -673,31 +640,20 @@ However, the villagers did not believe that I could see. They thought I was ___1
         }
 
         async function autoSaveProgress() {
-            if (!currentUser || !db || !isQuizActive || currentUser.uid.startsWith('local_')) return;
+            if (!db || !isQuizActive || !currentStudentName) return;
             const payload = {
-                studentName: currentStudentName, userId: currentUser.uid, moduleId: activeModule, moduleTitle: quizData[activeModule].title,
+                studentName: currentStudentName, userId: currentStudentName, moduleId: activeModule, moduleTitle: quizData[activeModule].title,
                 currentQIndex, totalQuestions: currentQuestions.length, currentScore, cheatingAttempts, answers: userAnswersHistory,
                 questionOrder: currentQuestions.map(q => q.originalIndex),
                 lastUpdated: Date.now(), formattedTime: new Date().toLocaleTimeString()
             };
             try {
-                await setDoc(doc(db, 'artifacts', 'english-course-l4l6', 'users', currentUser.uid, 'progress', activeModule), payload);
-                await setDoc(doc(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_progress', `${currentUser.uid}_${activeModule}`), payload);
+                // 儲存進度時同樣綁定 currentStudentName
+                await setDoc(doc(db, 'artifacts', 'english-course-l4l6', 'users', currentStudentName, 'progress', activeModule), payload);
+                await setDoc(doc(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_progress', `${currentStudentName}_${activeModule}`), payload);
             } catch(e) {}
         }
-// 新增：呼叫瀏覽器內建語音引擎
-        window.playWordAudio = function(word) {
-            if ('speechSynthesis' in window) {
-                // 停止前一個還沒唸完的聲音（避免學生狂按重疊）
-                window.speechSynthesis.cancel(); 
-                const utterance = new SpeechSynthesisUtterance(word);
-                utterance.lang = 'en-US'; // 設定為美式發音 (若要英式可改為 en-GB)
-                utterance.rate = 0.85;    // 語速微調慢一點(0.85)，適合學生聽寫
-                window.speechSynthesis.speak(utterance);
-            } else {
-                alert('您的瀏覽器不支援語音發音功能喔！建議使用 Chrome 或 Safari。');
-            }
-        };
+
         function renderQuestion() {
             const q = currentQuestions[currentQIndex];
             document.getElementById('quiz-progress').innerText = `${currentQIndex + 1} / ${currentQuestions.length}`;
@@ -713,13 +669,15 @@ However, the villagers did not believe that I could see. They thought I was ___1
             const optionsBox = document.getElementById('options-container');
             const textBox = document.getElementById('text-input-container');
 
-if (q.t === 'text') {
+            if (q.t === 'text') {
                 optionsBox.classList.add('hidden'); textBox.classList.remove('hidden');
                 document.getElementById('spelling-prefix').innerText = q.f;
                 
-                // 綁定發音按鈕：點擊時唸出 q.a (該題的正確單字)
+                // 綁定發音按鈕
                 const audioBtn = document.getElementById('btn-play-audio');
-                if(audioBtn) audioBtn.onclick = () => playWordAudio(q.a);
+                if(audioBtn) {
+                    audioBtn.onclick = () => playWordAudio(q.a);
+                }
 
                 const input = document.getElementById('spelling-input');
                 input.value = ''; input.disabled = false; input.focus(); document.getElementById('btn-submit-text').disabled = false;
@@ -768,18 +726,18 @@ if (q.t === 'text') {
         async function finishQuiz() {
             isQuizActive = false; const finalScore = Math.round((currentScore / currentQuestions.length) * 100);
             const payload = {
-                studentName: currentStudentName, userId: currentUser ? currentUser.uid : 'local', moduleName: quizData[activeModule].title,
+                studentName: currentStudentName, userId: currentStudentName, moduleName: quizData[activeModule].title,
                 score: finalScore, cheatingAttempts, answers: userAnswersHistory, timestamp: new Date().toLocaleString(), serverTime: Date.now()
             };
             let localHist = JSON.parse(localStorage.getItem(`hist_${currentStudentName}`) || '[]');
             localHist.push(payload); localStorage.setItem(`hist_${currentStudentName}`, JSON.stringify(localHist));
 
-            if (currentUser && db && !currentUser.uid.startsWith('local_')) {
+            if (db && currentStudentName) {
                 try {
-                    await addDoc(collection(db, 'artifacts', 'english-course-l4l6', 'users', currentUser.uid, 'records'), payload);
+                    await addDoc(collection(db, 'artifacts', 'english-course-l4l6', 'users', currentStudentName, 'records'), payload);
                     await addDoc(collection(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_records'), payload);
-                    await deleteDoc(doc(db, 'artifacts', 'english-course-l4l6', 'users', currentUser.uid, 'progress', activeModule));
-                    await deleteDoc(doc(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_progress', `${currentUser.uid}_${activeModule}`));
+                    await deleteDoc(doc(db, 'artifacts', 'english-course-l4l6', 'users', currentStudentName, 'progress', activeModule));
+                    await deleteDoc(doc(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_progress', `${currentStudentName}_${activeModule}`));
                     alert(`測驗完成！得分：${finalScore} 分 (成績已上傳)`);
                 } catch(e) { alert(`測驗完成！得分：${finalScore} 分`); }
             } else { alert(`測驗完成！得分：${finalScore} 分`); }
