@@ -101,9 +101,15 @@
                 
                 <div id="options-container" class="space-y-3 mb-6"></div>
                 
-                <div id="text-input-container" class="hidden mb-6">
+<div id="text-input-container" class="hidden mb-6">
                     <div class="bg-gray-50 p-4 rounded-xl border mb-4">
-                        <label class="block text-sm font-semibold mb-2">請輸入完整單字 (防呆與自動校正已關閉)：</label>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-semibold">請輸入完整單字 (防呆與自動校正已關閉)：</label>
+                            <!-- 這是新增的發音按鈕 -->
+                            <button id="btn-play-audio" class="text-blue-700 hover:text-blue-900 bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-full text-sm font-bold flex items-center transition shadow-sm">
+                                🔊 聽發音
+                            </button>
+                        </div>
                         <div class="flex items-center space-x-2">
                             <span id="spelling-prefix" class="bg-blue-600 text-white font-bold px-4 py-3 rounded-lg text-lg"></span>
                             <input type="text" id="spelling-input" class="flex-grow px-4 py-3 text-lg font-mono border-2 rounded-lg focus:border-blue-500 outline-none" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off">
@@ -111,16 +117,6 @@
                     </div>
                     <button id="btn-submit-text" onclick="submitTextAnswer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg">確認提交</button>
                 </div>
-
-                <div id="quiz-feedback" class="hidden mb-6 p-4 rounded-xl"></div>
-
-                <div class="flex justify-between items-center border-t pt-4">
-                    <button onclick="showDashboard()" class="text-gray-500 text-sm font-medium">暫停並返回選單</button>
-                    <button id="btn-next-question" class="hidden bg-blue-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-md">下一題 &rarr;</button>
-                    <button id="btn-finish-quiz" class="hidden bg-green-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-md">完成測驗</button>
-                </div>
-            </div>
-        </div>
 
         <div id="view-records" class="hidden w-full max-w-4xl fade-in my-6">
             <div class="bg-white rounded-2xl shadow-lg p-6">
@@ -689,7 +685,19 @@ However, the villagers did not believe that I could see. They thought I was ___1
                 await setDoc(doc(db, 'artifacts', 'english-course-l4l6', 'public', 'data', 'student_progress', `${currentUser.uid}_${activeModule}`), payload);
             } catch(e) {}
         }
-
+// 新增：呼叫瀏覽器內建語音引擎
+        window.playWordAudio = function(word) {
+            if ('speechSynthesis' in window) {
+                // 停止前一個還沒唸完的聲音（避免學生狂按重疊）
+                window.speechSynthesis.cancel(); 
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US'; // 設定為美式發音 (若要英式可改為 en-GB)
+                utterance.rate = 0.85;    // 語速微調慢一點(0.85)，適合學生聽寫
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('您的瀏覽器不支援語音發音功能喔！建議使用 Chrome 或 Safari。');
+            }
+        };
         function renderQuestion() {
             const q = currentQuestions[currentQIndex];
             document.getElementById('quiz-progress').innerText = `${currentQIndex + 1} / ${currentQuestions.length}`;
@@ -705,9 +713,14 @@ However, the villagers did not believe that I could see. They thought I was ___1
             const optionsBox = document.getElementById('options-container');
             const textBox = document.getElementById('text-input-container');
 
-            if (q.t === 'text') {
+if (q.t === 'text') {
                 optionsBox.classList.add('hidden'); textBox.classList.remove('hidden');
                 document.getElementById('spelling-prefix').innerText = q.f;
+                
+                // 綁定發音按鈕：點擊時唸出 q.a (該題的正確單字)
+                const audioBtn = document.getElementById('btn-play-audio');
+                if(audioBtn) audioBtn.onclick = () => playWordAudio(q.a);
+
                 const input = document.getElementById('spelling-input');
                 input.value = ''; input.disabled = false; input.focus(); document.getElementById('btn-submit-text').disabled = false;
                 input.onkeyup = (e) => { if (e.key === 'Enter') submitTextAnswer(); };
